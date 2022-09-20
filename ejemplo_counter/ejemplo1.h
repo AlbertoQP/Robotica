@@ -12,6 +12,10 @@ class ejemplo1 : public QWidget, public Ui_Counter
 
     public slots:
         void doButton();
+        void contador();
+
+    private:
+        int time = 0;
 };
 
 #endif // ejemplo1_H
