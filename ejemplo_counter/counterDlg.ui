@@ -6,8 +6,8 @@
    <rect>
     <x>0</x>
     <y>0</y>
-    <width>400</width>
-    <height>300</height>
+    <width>608</width>
+    <height>229</height>
    </rect>
   </property>
   <property name="windowTitle">
@@ -16,10 +16,10 @@
   <widget class="QPushButton" name="button">
    <property name="geometry">
     <rect>
-     <x>50</x>
-     <y>190</y>
+     <x>0</x>
+     <y>170</y>
      <width>141</width>
-     <height>71</height>
+     <height>51</height>
     </rect>
    </property>
    <property name="text">
@@ -29,8 +29,8 @@
   <widget class="QLCDNumber" name="lcdNumber">
    <property name="geometry">
     <rect>
-     <x>50</x>
-     <y>40</y>
+     <x>0</x>
+     <y>0</y>
      <width>301</width>
      <height>91</height>
     </rect>
@@ -39,10 +39,10 @@
   <widget class="QPushButton" name="button_2">
    <property name="geometry">
     <rect>
-     <x>210</x>
-     <y>190</y>
+     <x>160</x>
+     <y>170</y>
      <width>141</width>
-     <height>71</height>
+     <height>51</height>
     </rect>
    </property>
    <property name="text">
@@ -52,8 +52,8 @@
   <widget class="QWidget" name="verticalLayoutWidget">
    <property name="geometry">
     <rect>
-     <x>49</x>
-     <y>130</y>
+     <x>0</x>
+     <y>100</y>
      <width>301</width>
      <height>51</height>
     </rect>
@@ -61,6 +61,9 @@
    <layout class="QVBoxLayout" name="verticalLayout">
     <item>
      <widget class="QTextEdit" name="textEdit">
+      <property name="enabled">
+       <bool>true</bool>
+      </property>
       <property name="frameShape">
        <enum>QFrame::Box</enum>
       </property>
@@ -75,12 +78,70 @@ p, li { white-space: pre-wrap; }
     </item>
     <item>
      <widget class="QSlider" name="horizontalSlider">
+      <property name="minimum">
+       <number>0</number>
+      </property>
+      <property name="maximum">
+       <number>99</number>
+      </property>
+      <property name="value">
+       <number>49</number>
+      </property>
       <property name="orientation">
        <enum>Qt::Horizontal</enum>
       </property>
      </widget>
     </item>
    </layout>
+  </widget>
+  <widget class="QLCDNumber" name="lcdNumber_2">
+   <property name="geometry">
+    <rect>
+     <x>310</x>
+     <y>0</y>
+     <width>301</width>
+     <height>91</height>
+    </rect>
+   </property>
+  </widget>
+  <widget class="QPushButton" name="button_4">
+   <property name="geometry">
+    <rect>
+     <x>310</x>
+     <y>100</y>
+     <width>121</width>
+     <height>51</height>
+    </rect>
+   </property>
+   <property name="text">
+    <string>+10s</string>
+   </property>
+  </widget>
+  <widget class="QPushButton" name="button_5">
+   <property name="geometry">
+    <rect>
+     <x>310</x>
+     <y>170</y>
+     <width>121</width>
+     <height>51</height>
+    </rect>
+   </property>
+   <property name="text">
+    <string>+1min</string>
+   </property>
+  </widget>
+  <widget class="QPushButton" name="button_6">
+   <property name="geometry">
+    <rect>
+     <x>440</x>
+     <y>100</y>
+     <width>161</width>
+     <height>121</height>
+    </rect>
+   </property>
+   <property name="text">
+    <string>COUNTDOWN START</string>
+   </property>
   </widget>
  </widget>
  <resources/>
