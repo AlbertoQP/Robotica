@@ -16,14 +16,14 @@
   <widget class="QPushButton" name="button">
    <property name="geometry">
     <rect>
-     <x>80</x>
-     <y>180</y>
-     <width>251</width>
+     <x>50</x>
+     <y>160</y>
+     <width>141</width>
      <height>71</height>
     </rect>
    </property>
    <property name="text">
-    <string>STOP</string>
+    <string>START / STOP</string>
    </property>
   </widget>
   <widget class="QLCDNumber" name="lcdNumber">
@@ -34,6 +34,19 @@
      <width>301</width>
      <height>91</height>
     </rect>
+   </property>
+  </widget>
+  <widget class="QPushButton" name="button_2">
+   <property name="geometry">
+    <rect>
+     <x>210</x>
+     <y>160</y>
+     <width>141</width>
+     <height>71</height>
+    </rect>
+   </property>
+   <property name="text">
+    <string>RESET</string>
    </property>
   </widget>
  </widget>
