@@ -17,7 +17,7 @@
    <property name="geometry">
     <rect>
      <x>50</x>
-     <y>160</y>
+     <y>190</y>
      <width>141</width>
      <height>71</height>
     </rect>
@@ -40,13 +40,39 @@
    <property name="geometry">
     <rect>
      <x>210</x>
-     <y>160</y>
+     <y>190</y>
      <width>141</width>
      <height>71</height>
     </rect>
    </property>
    <property name="text">
     <string>RESET</string>
+   </property>
+  </widget>
+  <widget class="QSlider" name="horizontalSlider">
+   <property name="geometry">
+    <rect>
+     <x>50</x>
+     <y>130</y>
+     <width>301</width>
+     <height>61</height>
+    </rect>
+   </property>
+   <property name="orientation">
+    <enum>Qt::Horizontal</enum>
+   </property>
+  </widget>
+  <widget class="QPlainTextEdit" name="plainTextEdit">
+   <property name="geometry">
+    <rect>
+     <x>160</x>
+     <y>130</y>
+     <width>91</width>
+     <height>21</height>
+    </rect>
+   </property>
+   <property name="plainText">
+    <string>Period Slider</string>
    </property>
   </widget>
  </widget>
