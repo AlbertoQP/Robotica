@@ -13,11 +13,16 @@ class ejemplo1 : public QWidget, public Ui_Counter
     public slots:
         void doButton();
         void contador();
+        void cambiarTiempo(int);
         void doReset();
+        void doAddtime();
+        void doCuentaAtras();
 
     private:
         QTimer *timer = new QTimer(this);
         int time = 0;
+        int periodo = 1000;
+        int time2 = 0;
 };
 
 #endif // ejemplo1_H
