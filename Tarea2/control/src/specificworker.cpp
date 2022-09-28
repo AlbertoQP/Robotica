@@ -18,6 +18,8 @@
  */
 #include "specificworker.h"
 
+const int UMBRAL_DISTANCIA = 900;
+
 /**
 * \brief Default constructor
 */
@@ -50,11 +52,6 @@ bool SpecificWorker::setParams(RoboCompCommonBehavior::ParameterList params)
 //	}
 //	catch(const std::exception &e) { qFatal("Error reading config params"); }
 
-
-
-
-
-
 	return true;
 }
 
@@ -76,44 +73,38 @@ void SpecificWorker::initialize(int period)
 void SpecificWorker::compute()
 {
     // El robot siente
+    RoboCompLaser::TLaserData ldata;
     try
     {
-        auto ldata = laser_proxy->getLaserData();
-        for(const auto &l : ldata)
-            qInfo() << l.angle << l.dist;
-
-        qInfo() << "------------------------------------";
+        ldata = laser_proxy->getLaserData();
     }
-    catch (const Ice::Exception & e) { std::cout<<e.what() << std::endl; };
+    catch (const Ice::Exception & e) { std::cout<<e.what() << std::endl; return;};
 
     // El robot piensa que va a hacer
-
-
-    // Ordenar por distancia la seccion central del laser
-    // Si el primero es menor que un umbral parar y girar
-
+    // Ordenar por distancia la seccion central del laser1
+    RoboCompLaser::TLaserData central(ldata.begin() + ldata.size()/3, ldata.end() - ldata.size()/3);
+    std::ranges::sort(central, {}, &RoboCompLaser::TData::dist);
+    float adv = 0.0;
+    float rot = 0.0;
+    std::cout<<"Distancia: "<<central.front().dist<<std::endl;
+    if(central.front().dist < UMBRAL_DISTANCIA)
+    {
+         adv = 0.0;
+         rot = 1.0;
+    }
+    else
+    {
+        adv = 300.0;
+        rot = 0.0;
+    }
 
     // El robot actua
     try
     {
-        float adv = 300;
-        float rot = 0.5;
         differentialrobot_proxy->setSpeedBase(adv, rot);
     }
-    catch (const Ice::Exception & e) { std::cout<<e.what() << std::endl; };
-    
-	//computeCODE
-	//QMutexLocker locker(mutex);
-	//try
-	//{
-	//  camera_proxy->getYImage(0,img, cState, bState);
-	//  memcpy(image_gray.data, &img[0], m_width*m_height*sizeof(uchar));
-	//  searchTags(image_gray);
-	//}
-	//catch(const Ice::Exception &e)
-	//{
-	//  std::cout << "Error reading from Camera" << e << std::endl;
-	//}
+    catch (const Ice::Exception & e) { std::cout<<e.what() << std::endl; return;};
+
 }
 
 int SpecificWorker::startup_check()
