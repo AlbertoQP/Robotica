@@ -75,6 +75,33 @@ void SpecificWorker::initialize(int period)
 
 void SpecificWorker::compute()
 {
+    // El robot siente
+    try
+    {
+        auto ldata = laser_proxy->getLaserData();
+        for(const auto &l : ldata)
+            qInfo() << l.angle << l.dist;
+
+        qInfo() << "------------------------------------";
+    }
+    catch (const Ice::Exception & e) { std::cout<<e.what() << std::endl; };
+
+    // El robot piensa que va a hacer
+
+
+    // Ordenar por distancia la seccion central del laser
+    // Si el primero es menor que un umbral parar y girar
+
+
+    // El robot actua
+    try
+    {
+        float adv = 300;
+        float rot = 0.5;
+        differentialrobot_proxy->setSpeedBase(adv, rot);
+    }
+    catch (const Ice::Exception & e) { std::cout<<e.what() << std::endl; };
+    
 	//computeCODE
 	//QMutexLocker locker(mutex);
 	//try
@@ -87,8 +114,6 @@ void SpecificWorker::compute()
 	//{
 	//  std::cout << "Error reading from Camera" << e << std::endl;
 	//}
-	
-	
 }
 
 int SpecificWorker::startup_check()
