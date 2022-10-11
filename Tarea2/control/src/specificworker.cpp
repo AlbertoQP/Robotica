@@ -6,7 +6,7 @@
  *    RoboComp is free software: you can redistribute it and/or modify
  *    it under the terms of the GNU General Public License as published by
  *    the Free Software Foundation, either version 3 of the License, or
- *    (at your option) any later version.
+ *    (at your option) any later version.s
  *
  *    RoboComp is distributed in the hope that it will be useful,
  *    but WITHOUT ANY WARRANTY; without even the implied warranty of
@@ -18,17 +18,19 @@
  */
 #include "specificworker.h"
 
-const int UMBRAL_DISTANCIA = 900;
+const int UMBRAL_DISTANCIA = 1000;
+bool flag = false;
+enum class TipoModo {Esquivar, Paredes, Espiral};
 
 /**
 * \brief Default constructor
 */
 SpecificWorker::SpecificWorker(TuplePrx tprx, bool startup_check) : GenericWorker(tprx)
 {
-	this->startup_check_flag = startup_check;
-	// Uncomment if there's too many debug messages
-	// but it removes the possibility to see the messages
-	// shown in the console with qDebug()
+    this->startup_check_flag = startup_check;
+    // Uncomment if there's too many debug messages
+    // but it removes the possibility to see the messages
+    // shown in the console with qDebug()
 //	QLoggingCategory::setFilterRules("*.debug=false\n");
 }
 
@@ -37,7 +39,7 @@ SpecificWorker::SpecificWorker(TuplePrx tprx, bool startup_check) : GenericWorke
 */
 SpecificWorker::~SpecificWorker()
 {
-	std::cout << "Destroying SpecificWorker" << std::endl;
+    std::cout << "Destroying SpecificWorker" << std::endl;
 }
 
 bool SpecificWorker::setParams(RoboCompCommonBehavior::ParameterList params)
@@ -52,66 +54,92 @@ bool SpecificWorker::setParams(RoboCompCommonBehavior::ParameterList params)
 //	}
 //	catch(const std::exception &e) { qFatal("Error reading config params"); }
 
-	return true;
+    return true;
 }
 
 void SpecificWorker::initialize(int period)
 {
-	std::cout << "Initialize worker" << std::endl;
-	this->Period = period;
-	if(this->startup_check_flag)
-	{
-		this->startup_check();
-	}
-	else
-	{
-		timer.start(Period);
-	}
+    std::cout << "Initialize worker" << std::endl;
+    this->Period = period;
+    if(this->startup_check_flag)
+    {
+        this->startup_check();
+    }
+    else
+    {
+        timer.start(Period);
+    }
 
 }
 
 void SpecificWorker::compute()
 {
     // El robot siente
-    RoboCompLaser::TLaserData ldata;
+    RoboCompLaserMulti::TLaserData ldata;
     try
     {
-        ldata = laser_proxy->getLaserData();
+        ldata = lasermulti_proxy->getLaserData(3);
     }
     catch (const Ice::Exception & e) { std::cout<<e.what() << std::endl; return;};
 
+    TipoModo modo;
+    switch (modo)
+    {
+        case TipoModo::Esquivar:
+            std::cout << "Modo esquivar" << std::endl;
+            break;
+        case TipoModo::Paredes:
+            std::cout << "Modo paredes" << std::endl;
+            break;
+        case TipoModo::Espiral:
+            std::cout << "Modo espiral" << std::endl;
+            break;
+    }
+
     // El robot piensa que va a hacer
     // Ordenar por distancia la seccion central del laser1
-    RoboCompLaser::TLaserData central(ldata.begin() + ldata.size()/3, ldata.end() - ldata.size()/3);
-    std::ranges::sort(central, {}, &RoboCompLaser::TData::dist);
+    RoboCompLaserMulti::TLaserData central(ldata.begin() + ldata.size()/3, (ldata.end() - ldata.size()/3)-1);
+    RoboCompLaserMulti::TLaserData der(ldata.end() - ldata.size()/3, ldata.end());
+    RoboCompLaserMulti::TLaserData izq(ldata.begin(), (ldata.begin() + ldata.size()/3)-1);
+    std::ranges::sort(central, {}, &RoboCompLaserMulti::TData::dist);
+    std::ranges::sort(der, {}, &RoboCompLaserMulti::TData::dist);
+    std::ranges::sort(izq, {}, &RoboCompLaserMulti::TData::dist);
     float adv = 0.0;
     float rot = 0.0;
     std::cout<<"Distancia: "<<central.front().dist<<std::endl;
-    if(central.front().dist < UMBRAL_DISTANCIA)
+
+    if((central.front().dist < UMBRAL_DISTANCIA))
     {
-         adv = 0.0;
-         rot = 1.0;
+        if((der.front().dist > izq.front().dist) && !flag){
+            adv = 0.0;
+            rot = 2.0;
+        }
+        else{ //Siempre entra por aqui
+            adv = 0.0;
+            rot = -2.0;
+        }
+        flag = true;
     }
     else
     {
-        adv = 300.0;
+        adv = 600.0;
         rot = 0.0;
+        flag = false;
     }
 
     // El robot actua
     try
     {
-        differentialrobot_proxy->setSpeedBase(adv, rot);
+        differentialrobotmulti_proxy->setSpeedBase(3, adv, rot);
     }
     catch (const Ice::Exception & e) { std::cout<<e.what() << std::endl; return;};
-
 }
 
 int SpecificWorker::startup_check()
 {
-	std::cout << "Startup check" << std::endl;
-	QTimer::singleShot(200, qApp, SLOT(quit()));
-	return 0;
+    std::cout << "Startup check" << std::endl;
+    QTimer::singleShot(200, qApp, SLOT(quit()));
+    return 0;
 }
 
 
@@ -142,4 +170,3 @@ int SpecificWorker::startup_check()
 // From the RoboCompLaser you can use this types:
 // RoboCompLaser::LaserConfData
 // RoboCompLaser::TData
-
