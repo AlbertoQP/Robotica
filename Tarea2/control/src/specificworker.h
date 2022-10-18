@@ -44,7 +44,11 @@ public slots:
 	void initialize(int period);
 private:
 	std::shared_ptr < InnerModel > innerModel;
+    enum class TipoModo {Idle, Esquivar, Paredes, Espiral};
 	bool startup_check_flag;
+    std::tuple<SpecificWorker::TipoModo, float, float> modo_esquivar(RoboCompLaserMulti::TLaserData &ldata);
+    std::tuple<SpecificWorker::TipoModo, float, float> modo_paredes(RoboCompLaserMulti::TLaserData &ldata);
+    std::tuple<SpecificWorker::TipoModo, float, float> modo_espiral(RoboCompLaserMulti::TLaserData &ldata);
 
 };
 
