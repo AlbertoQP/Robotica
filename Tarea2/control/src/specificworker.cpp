@@ -79,6 +79,7 @@ void SpecificWorker::compute()
     catch (const Ice::Exception & e) { std::cout<<e.what() << std::endl; return;};
 
     TipoModo modo = std::get<0>(result);
+    std::cout << "COMPUTE - MODO: " << static_cast<std::underlying_type<TipoModo>::type>(modo) << std::endl;
 
     switch (modo)
     {
@@ -94,16 +95,15 @@ void SpecificWorker::compute()
             std::cout << "Modo girar" << std::endl;
             result = modo_girar(ldata);
             break;
-            /*case TipoModo::Paredes:
-                std::cout << "Modo paredes" << std::endl;
-                modo_paredes(ldata);
-                break;
-            case TipoModo::Espiral:
-                std::cout << "Modo espiral" << std::endl;
-                modo_espiral(ldata);
-                break;*/
+        case TipoModo::Paredes:
+            std::cout << "Modo paredes" << std::endl;
+            result = modo_paredes(ldata);
+            break;
+        case TipoModo::Espiral:
+            std::cout << "Modo espiral" << std::endl;
+            result = modo_espiral(ldata);
+            break;
     }
-    modo = std::get<TipoModo>(result);
 
     // El robot actua
     auto &[_, adv, rot] = result;
@@ -112,19 +112,6 @@ void SpecificWorker::compute()
     catch (const Ice::Exception & e) { std::cout<<e.what() << std::endl; return;}
 }
 
-/*
-int check_maxdistance(int a, int b, int c)
-{
-    // a > b > c -> 0
-    // b > a > c -> 1
-    // c > a > b -> 2
-    if (a > b && a > c)
-        return 0;
-    else if (b > a && b > c)
-        return 1;
-    else if (c > a && c > b)
-        return 2;
-}*/
 SpecificWorker::Action SpecificWorker::modo_idle(const RoboCompLaserMulti::TLaserData &ldata)
 {
     auto tuple = std::make_tuple(TipoModo::Avanzar, MAX_SPEED, 0);
@@ -159,8 +146,7 @@ SpecificWorker::Action SpecificWorker::modo_avanzar(const RoboCompLaserMulti::TL
         return std::make_tuple(modo, adv, rot);
     }
 
-    //REVISAR HACER EL MODO ESPIRAL
-/*
+    // Modo Espiral
     if (auto sum = std::accumulate(ldata.begin(), ldata.end(), 0.f, [](auto s, auto a)
         {return s += a.dist;}); sum > ldata.size() * 4000 * 0.8)
     {
@@ -169,7 +155,7 @@ SpecificWorker::Action SpecificWorker::modo_avanzar(const RoboCompLaserMulti::TL
         rot = 0.25;
 
         return std::make_tuple(modo, adv, rot);
-    }*/
+    }
     modo = TipoModo::Avanzar;
 
     adv = MAX_SPEED;
@@ -191,7 +177,24 @@ SpecificWorker::Action SpecificWorker::modo_girar(const RoboCompLaserMulti::TLas
     if((central.front().dist > UMBRAL_COLISION))
     {
         // AVANZAR O PAREDES
-        modo = TipoModo::Avanzar;
+        int choice;
+        std::srand(time(0));
+        choice = rand() % 2;
+
+        std::cout << "Eleccion Avanzar(0) o Paredes (1): " << choice << std::endl;
+
+        switch(choice)
+        {
+            case 0:
+                modo = TipoModo::Avanzar;
+                break;
+            case 1:
+                modo = TipoModo::Paredes;
+                break;
+            default:
+                modo = TipoModo::Avanzar;
+                break;
+        }
 
         float adv = MAX_SPEED;
         float rot = 0.0;
@@ -213,6 +216,8 @@ SpecificWorker::Action SpecificWorker::modo_paredes(const RoboCompLaserMulti::TL
     std::ranges::sort(der, {}, &RoboCompLaserMulti::TData::dist);
     std::ranges::sort(izq, {}, &RoboCompLaserMulti::TData::dist);
 
+    std::cout<<"Distancia: "<<central.front().dist<<std::endl;
+
     float adv = 0.0;
     float rot = 0.0;
     TipoModo modo = TipoModo::Paredes;
@@ -231,14 +236,66 @@ SpecificWorker::Action SpecificWorker::modo_paredes(const RoboCompLaserMulti::TL
     }
 
     // IR GIRANDO IZQUIERDA DERECHA CONTINUAMENTE PARA SIMULAR IR RECTO
+    //Nos alejamos del muro
+    if((der.front().dist < UMBRAL_COLISION))//Quiza variables golbales?
+    {
+        modo = TipoModo::Paredes;
+        adv = MAX_SPEED;
+        rot = -0.2;
+        return std::make_tuple(modo, adv, rot);
+    }
 
+    //Nos acercamos al muro
+    else if(izq.front().dist >= UMBRAL_COLISION)//Quiza variables golbales?
+    {
+        modo = TipoModo::Paredes;
+        adv = MAX_SPEED;
+        rot = 0.2;
+        return std::make_tuple(modo, adv, rot);
+    }
+    //No hacemos nada, ya va paralelo al muro
+    else
+    {
+        return result;
+    }
 }
 
 SpecificWorker::Action SpecificWorker::modo_espiral(const RoboCompLaserMulti::TLaserData &ldata)
 {
+    RoboCompLaserMulti::TLaserData central(ldata.begin() + ldata.size()/3, (ldata.end() - ldata.size()/3)-1);
+    RoboCompLaserMulti::TLaserData der(ldata.end() - ldata.size()/3, ldata.end() - 150);
+    RoboCompLaserMulti::TLaserData izq(ldata.begin() + 150, (ldata.begin() + ldata.size()/3)-1);
+    std::ranges::sort(central, {}, &RoboCompLaserMulti::TData::dist);
+    std::ranges::sort(der, {}, &RoboCompLaserMulti::TData::dist);
+    std::ranges::sort(izq, {}, &RoboCompLaserMulti::TData::dist);
 
+    std::cout<<"Distancia: "<<central.front().dist<<std::endl;
+
+    float adv = 0.0;
+    float rot = 1.0;
+    TipoModo modo = TipoModo::Espiral;
+
+    if((central.front().dist < UMBRAL_COLISION))
+    {
+        modo = TipoModo::Girar;
+        adv = 100.0;
+
+        if (der.front().dist > izq.front().dist)
+            rot = -1.0;
+        else
+            rot = 1.0;
+
+        return std::make_tuple(modo, adv, rot);
+    }
+    else
+    {
+        adv = 0.2 + std::get<1>(result);
+        std::get<1>(result) = adv;
+        rot = std::get<2>(result);
+
+        return std::make_tuple(modo, adv, rot);
+    }
 }
-
 
 int SpecificWorker::startup_check()
 {
