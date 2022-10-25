@@ -19,6 +19,8 @@
 #include "specificworker.h"
 
 const int UMBRAL_COLISION = 950;
+const int UMBRAL_MURO = 1000;
+const int DELTA = 50;
 const float MAX_SPEED = 900.0;
 
 /**
@@ -120,6 +122,7 @@ SpecificWorker::Action SpecificWorker::modo_idle(const RoboCompLaserMulti::TLase
 
 SpecificWorker::Action SpecificWorker::modo_avanzar(const RoboCompLaserMulti::TLaserData &ldata)
 {
+    // TODO: Revisar recorte del laser por los lados
     RoboCompLaserMulti::TLaserData central(ldata.begin() + ldata.size()/3, (ldata.end() - ldata.size()/3)-1);
     RoboCompLaserMulti::TLaserData der(ldata.end() - ldata.size()/3, ldata.end() - 150);
     RoboCompLaserMulti::TLaserData izq(ldata.begin() + 150, (ldata.begin() + ldata.size()/3)-1);
@@ -151,8 +154,8 @@ SpecificWorker::Action SpecificWorker::modo_avanzar(const RoboCompLaserMulti::TL
         {return s += a.dist;}); sum > ldata.size() * 4000 * 0.8)
     {
         modo = TipoModo::Espiral;
-        adv = 50.0;
-        rot = 0.25;
+        adv = 100.0;
+        rot = 0.5;
 
         return std::make_tuple(modo, adv, rot);
     }
@@ -237,7 +240,7 @@ SpecificWorker::Action SpecificWorker::modo_paredes(const RoboCompLaserMulti::TL
 
     // IR GIRANDO IZQUIERDA DERECHA CONTINUAMENTE PARA SIMULAR IR RECTO
     //Nos alejamos del muro
-    if((der.front().dist < UMBRAL_COLISION))//Quiza variables golbales?
+    if((der.front().dist < UMBRAL_MURO - DELTA))
     {
         modo = TipoModo::Paredes;
         adv = MAX_SPEED;
@@ -246,14 +249,14 @@ SpecificWorker::Action SpecificWorker::modo_paredes(const RoboCompLaserMulti::TL
     }
 
     //Nos acercamos al muro
-    else if(izq.front().dist >= UMBRAL_COLISION)//Quiza variables golbales?
+    else if(der.front().dist >= UMBRAL_MURO + DELTA)
     {
         modo = TipoModo::Paredes;
         adv = MAX_SPEED;
         rot = 0.2;
         return std::make_tuple(modo, adv, rot);
     }
-    //No hacemos nada, ya va paralelo al muro
+    //No hacemos nada, ya va paralelo al muro. Devolvemos la tupla
     else
     {
         return result;
@@ -289,7 +292,8 @@ SpecificWorker::Action SpecificWorker::modo_espiral(const RoboCompLaserMulti::TL
     }
     else
     {
-        adv = 0.2 + std::get<1>(result);
+        // TODO: Controlar velocidad de avance y giro máximo
+        adv = 1.2 + std::get<1>(result);
         std::get<1>(result) = adv;
         rot = std::get<2>(result);
 
