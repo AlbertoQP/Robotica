@@ -18,10 +18,11 @@
  */
 #include "specificworker.h"
 
-const int UMBRAL_COLISION = 950;
+const int UMBRAL_COLISION = 1050;
+const int VELOCIDAD_ESPIRAL = 400;
 const int UMBRAL_MURO = 1000;
 const int DELTA = 50;
-const float MAX_SPEED = 900.0;
+const float MAX_SPEED = 1200.0;
 
 /**
 * \brief Default constructor
@@ -122,7 +123,6 @@ SpecificWorker::Action SpecificWorker::modo_idle(const RoboCompLaserMulti::TLase
 
 SpecificWorker::Action SpecificWorker::modo_avanzar(const RoboCompLaserMulti::TLaserData &ldata)
 {
-    // TODO: Revisar recorte del laser por los lados
     RoboCompLaserMulti::TLaserData central(ldata.begin() + ldata.size()/3, (ldata.end() - ldata.size()/3)-1);
     RoboCompLaserMulti::TLaserData der(ldata.end() - ldata.size()/3, ldata.end() - 150);
     RoboCompLaserMulti::TLaserData izq(ldata.begin() + 150, (ldata.begin() + ldata.size()/3)-1);
@@ -183,8 +183,6 @@ SpecificWorker::Action SpecificWorker::modo_girar(const RoboCompLaserMulti::TLas
         int choice;
         std::srand(time(0));
         choice = rand() % 2;
-
-        std::cout << "Eleccion Avanzar(0) o Paredes (1): " << choice << std::endl;
 
         switch(choice)
         {
@@ -293,10 +291,19 @@ SpecificWorker::Action SpecificWorker::modo_espiral(const RoboCompLaserMulti::TL
     else
     {
         // TODO: Controlar velocidad de avance y giro máximo
-        adv = 1.2 + std::get<1>(result);
-        std::get<1>(result) = adv;
+        adv = std::get<1>(result);
         rot = std::get<2>(result);
+        if(adv < VELOCIDAD_ESPIRAL){
+            adv += 1.2;
+        }
 
+        if(rot > 0.0){
+            rot -= 0.0005;
+        }
+        std::get<1>(result) = adv;
+        std::get<2>(result) = rot;
+
+        std::cout << "adv: " <<  adv << " rot: " << rot << std::endl;
         return std::make_tuple(modo, adv, rot);
     }
 }
