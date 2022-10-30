@@ -75,7 +75,7 @@ void SpecificWorker::initialize(int period)
 
 void SpecificWorker::compute()
 {
-    // El robot siente
+    // Lectura del laser
     RoboCompLaserMulti::TLaserData ldata;
     try
     { ldata = lasermulti_proxy->getLaserData(3); }
@@ -84,6 +84,7 @@ void SpecificWorker::compute()
     TipoModo modo = std::get<0>(result);
     std::cout << "COMPUTE - MODO: " << static_cast<std::underlying_type<TipoModo>::type>(modo) << std::endl;
 
+    // Selección de modo
     switch (modo)
     {
         default:
@@ -290,16 +291,16 @@ SpecificWorker::Action SpecificWorker::modo_espiral(const RoboCompLaserMulti::TL
     }
     else
     {
-        // TODO: Controlar velocidad de avance y giro máximo
         adv = std::get<1>(result);
         rot = std::get<2>(result);
-        if(adv < VELOCIDAD_ESPIRAL){
-            adv += 1.2;
-        }
 
-        if(rot > 0.0){
+        // Controla velocidad de avance y giro máximo
+        if(adv < VELOCIDAD_ESPIRAL)
+            adv += 1.2;
+
+        if(rot > 0.0)
             rot -= 0.0005;
-        }
+
         std::get<1>(result) = adv;
         std::get<2>(result) = rot;
 
