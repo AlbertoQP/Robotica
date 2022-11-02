@@ -1,5 +1,5 @@
-import "DifferentialRobotMulti.idsl";
-import "LaserMulti.idsl";
+import "DifferentialRobot.idsl";
+import "Laser.idsl";
 import "CameraRGBDSimple.idsl";
 import "YoloObjects.idsl";
 
@@ -7,7 +7,7 @@ Component control
 {
     Communications
     {
-        requires DifferentialRobotMulti, LaserMulti, CameraRGBDSimple, YoloObjects;
+        requires DifferentialRobot, Laser, CameraRGBDSimple, YoloObjects;
      };
     language Cpp11;
     gui Qt(QWidget);
