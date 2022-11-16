@@ -229,13 +229,14 @@ void SpecificWorker::compute()
 
     // TODO:: STATE MACHINE
     // state machine to activate basic behaviours. Returns a  target_coordinates vector
-    //  state_machine(objects, current_line);
+    state_machine(objects, current_line);
 
     /// eye tracking: tracks  current selected object or  IOR if none
     eye_track(robot);
     draw_top_camera_optic_ray();
 
     // DWA algorithm
+    qInfo()<< robot.get_robot_target_coordinates().x() <<robot.get_robot_target_coordinates().y()<<robot.get_robot_target_coordinates().z();
     auto [adv, rot, side] =  dwa.update(robot.get_robot_target_coordinates(), current_line, robot.get_current_advance_speed(), robot.get_current_rot_speed(), viewer);
 
     //qInfo() << __FUNCTION__ << adv <<  side << rot;
@@ -462,6 +463,42 @@ void SpecificWorker::move_robot(Eigen::Vector2f force)
 }
 
 ///////////////////  State machine ////////////////////////////////////////////
+
+void SpecificWorker::state_machine(const RoboCompYoloObjects::TObjects &objects, const std::vector<Eigen::Vector2f> &line)
+{
+    switch (state)
+    {
+        case State::IDLE:
+            state = State::SEARCHING;
+            break;
+        case State::SEARCHING:
+            search_state(objects);
+            break;
+        case State::APPROACHING:
+            approach_state(objects, line);
+            break;
+    }
+}
+
+void SpecificWorker::search_state(const RoboCompYoloObjects::TObjects &objects)
+{
+    std::cout << "Searching" << std::endl;
+    if (objects.empty()) return;
+
+    if(auto it = std::find_if_not(objects.begin(), objects.end(),
+                                  [r = robot](auto &a){return a.type == r.get_current_target().type;}); it != objects.end())
+    {
+        robot.set_current_target(*it);
+        state = State::APPROACHING;
+    }
+    else
+        robot.set_current_rotation(1.0f);
+}
+
+void SpecificWorker::approach_state(const RoboCompYoloObjects::TObjects &objects, const std::vector<Eigen::Vector2f> &line)
+{
+    std::cout << "Approach State" << std::endl;
+}
 
 
 ///////////////////// Aux //////////////////////////////////////////////////////////////////

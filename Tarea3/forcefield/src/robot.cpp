@@ -14,8 +14,10 @@ namespace rc
     }
     Eigen::Vector3f Robot::get_robot_target_coordinates()
     {
-        if(not has_target_flag)
-            return Eigen::Vector3f{0.f, 0.f, 0.f};
+        std::cout << current_rotation << std::endl;
+        if (current_rotation != 0){
+            std::cout << "ENTRO EN EL IF" << std::endl;
+            return Eigen::Vector3f{0.f, current_rotation, 0.f};}
 
         Eigen::Transform<float, 3, Eigen::Affine> tf = get_tf_cam_to_base();
         Eigen::Vector3f target = tf * get_camera_target_coordinates();
@@ -58,6 +60,16 @@ namespace rc
     bool Robot::has_target() const
     {
         return has_target_flag;
+    }
+
+    void Robot::set_current_rotation(float angle)
+    {
+        current_rotation = angle;
+    }
+
+    float Robot::get_current_rotation() const
+    {
+        return current_rotation;
     }
 
     float Robot::get_current_advance_speed() const

@@ -35,6 +35,7 @@ namespace rc
                 float get_current_rot_speed() const;
                 float get_target_angle_in_frame() const;
                 float get_current_pan_angle() const;
+                float get_current_rotation() const;
                 RoboCompYoloObjects::TBox get_current_target() const;
                 float get_distance_to_target();
                 Eigen::Transform<float, 3, Eigen::Affine> get_tf_cam_to_base();
@@ -49,6 +50,7 @@ namespace rc
                 void set_has_target(bool val);
                 bool has_target() const;
                 void set_desired_distance_to_target(float dist); //mm
+                void set_current_rotation(float angle);
 
                 const float width = 450;
                 const float length = 450;
@@ -68,6 +70,7 @@ namespace rc
                 float current_rot_speed = 0;
                 float camera_pan_angle = 0.f;
                 float min_distance_to_target = 800.f;
+                float current_rotation = 0.f;
                 Eigen::Transform<float, 3, Eigen::Affine> tf;
                 std::vector<std::string> axes;
                 RoboCompJointMotorSimple::JointMotorSimplePrxPtr joint_motor_proxy;
