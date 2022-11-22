@@ -35,10 +35,10 @@ namespace rc
                 float get_current_rot_speed() const;
                 float get_target_angle_in_frame() const;
                 float get_current_pan_angle() const;
-                float get_current_rotation() const;
                 RoboCompYoloObjects::TBox get_current_target() const;
                 float get_distance_to_target();
                 Eigen::Transform<float, 3, Eigen::Affine> get_tf_cam_to_base();
+                float get_pure_rotation() const;
                 void print();
                 void create_bumper(float offset =  150, AbstractGraphicViewer *viewer=nullptr);
 
@@ -48,9 +48,9 @@ namespace rc
                 void set_current_pan_angle(float pan);
                 void set_current_target(const RoboCompYoloObjects::TBox &target);
                 void set_has_target(bool val);
+                void set_pure_rotation(float rot);
                 bool has_target() const;
                 void set_desired_distance_to_target(float dist); //mm
-                void set_current_rotation(float angle);
 
                 const float width = 450;
                 const float length = 450;
@@ -70,12 +70,11 @@ namespace rc
                 float current_rot_speed = 0;
                 float camera_pan_angle = 0.f;
                 float min_distance_to_target = 800.f;
-                float current_rotation = 0.f;
                 Eigen::Transform<float, 3, Eigen::Affine> tf;
                 std::vector<std::string> axes;
                 RoboCompJointMotorSimple::JointMotorSimplePrxPtr joint_motor_proxy;
                 RoboCompOmniRobot::OmniRobotPrxPtr omnirobot_proxy;
-
+                float pure_rotation = 0.f;
                 RoboCompYoloObjects::TBox current_target{.type = -1};
                 bool has_target_flag = false;
                 std::map<float, float> bumper;

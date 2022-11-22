@@ -76,7 +76,7 @@ void SpecificWorker::initialize(int period)
         // sets servo to zero position
         // TODO: pasar a Robot
         RoboCompJointMotorSimple::MotorState servo_state;
-        while(true)
+        /*while(true)
             try
             {
                 servo_state = jointmotorsimple_proxy->getMotorState("camera_pan_joint");
@@ -84,7 +84,7 @@ void SpecificWorker::initialize(int period)
                 jointmotorsimple_proxy->setPosition("camera_pan_joint", RoboCompJointMotorSimple::MotorGoalPosition{0.f, 1.f});
                 usleep(100000);
             }
-            catch(const Ice::Exception &e){ std::cout << e.what() << std::endl; return;}
+            catch(const Ice::Exception &e){ std::cout << e.what() << std::endl; return;}*/
 
         // camera position wrt to robot
         Eigen::Transform<float, 3, Eigen::Affine> tf(Eigen::Translation3f(Eigen::Vector3f{0.f, 0.f, consts.top_camera_height}) *
@@ -222,7 +222,7 @@ void SpecificWorker::compute()
     RoboCompYoloObjects::TObjects objects = yolo_detect_objects(top_rgb_frame);
 
     /// draw top image
-    //cv::imshow("top", top_rgb_frame); cv::waitKey(5);
+    cv::imshow("top", top_rgb_frame); cv::waitKey(5);
 
     /// draw yolo_objects on 2D view
     draw_objects_on_2dview(objects, RoboCompYoloObjects::TBox());
@@ -232,16 +232,16 @@ void SpecificWorker::compute()
     state_machine(objects, current_line);
 
     /// eye tracking: tracks  current selected object or  IOR if none
-    eye_track(robot);
-    draw_top_camera_optic_ray();
+    //eye_track(robot);
+    //draw_top_camera_optic_ray();
 
     // DWA algorithm
     qInfo()<< robot.get_robot_target_coordinates().x() <<robot.get_robot_target_coordinates().y()<<robot.get_robot_target_coordinates().z();
     auto [adv, rot, side] =  dwa.update(robot.get_robot_target_coordinates(), current_line, robot.get_current_advance_speed(), robot.get_current_rot_speed(), viewer);
 
-    //qInfo() << __FUNCTION__ << adv <<  side << rot;
-    //    try{ omnirobot_proxy->setSpeedBase(side, adv, rot); }
-    //    catch(const Ice::Exception &e){ std::cout << e.what() << "Error connecting to omnirobot" << std::endl;}
+    qInfo() << __FUNCTION__ << adv <<  side << rot;
+        try{ omnirobot_proxy->setSpeedBase(side, adv, rot); }
+       catch(const Ice::Exception &e){ std::cout << e.what() << "Error connecting to omnirobot" << std::endl;}
     // execute move commands
     //move_robot(force);
 
@@ -483,21 +483,31 @@ void SpecificWorker::state_machine(const RoboCompYoloObjects::TObjects &objects,
 void SpecificWorker::search_state(const RoboCompYoloObjects::TObjects &objects)
 {
     std::cout << "Searching" << std::endl;
-    if (objects.empty()) return;
 
     if(auto it = std::find_if_not(objects.begin(), objects.end(),
                                   [r = robot](auto &a){return a.type == r.get_current_target().type;}); it != objects.end())
     {
         robot.set_current_target(*it);
+        robot.set_pure_rotation(0.f);
         state = State::APPROACHING;
     }
-    else
-        robot.set_current_rotation(1.0f);
+    else {
+        robot.set_pure_rotation(0.5f);
+    }
 }
 
 void SpecificWorker::approach_state(const RoboCompYoloObjects::TObjects &objects, const std::vector<Eigen::Vector2f> &line)
 {
     std::cout << "Approach State" << std::endl;
+
+    if(auto it = std::find_if(objects.begin(), objects.end(),
+                                  [r = robot](auto &a){return a.type == r.get_current_target().type;}); it != objects.end())
+    {
+        robot.set_current_target(*it);
+    }
+    else {
+        state = State::SEARCHING;
+    }
 }
 
 

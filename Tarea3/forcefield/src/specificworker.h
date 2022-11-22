@@ -124,10 +124,11 @@ class SpecificWorker : public GenericWorker
 
     // state machine
     void state_machine(const RoboCompYoloObjects::TObjects &objects, const std::vector<Eigen::Vector2f> &line);
+    enum class State {IDLE, SEARCHING, APPROACHING, WAITING};
+    State state = State::SEARCHING;
     void search_state(const RoboCompYoloObjects::TObjects &objects);
     void approach_state(const RoboCompYoloObjects::TObjects &objects, const std::vector<Eigen::Vector2f> &line);
-    enum class State {IDLE, SEARCHING, APPROACHING};
-    State state = State::IDLE;
+    //Eigen::Vector3f wait_state();
 
     float iou(const RoboCompYoloObjects::TBox &a, const RoboCompYoloObjects::TBox &b);
     float closest_distance_ahead(const vector<Eigen::Vector2f> &line);
@@ -140,6 +141,7 @@ class SpecificWorker : public GenericWorker
 
     // Clock
     rc::Timer<> clock;
+
 
 
 };
