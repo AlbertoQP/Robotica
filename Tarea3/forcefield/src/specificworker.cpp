@@ -16,7 +16,7 @@
  *    You should have received a copy of the GNU General Public License
  *    along with RoboComp.  If not, see <http://www.gnu.org/licenses/>.
  */
-
+#include <unistd.h>
 #include "specificworker.h"
 #include <cppitertools/range.hpp>
 #include <cppitertools/enumerate.hpp>
@@ -24,7 +24,7 @@
 #include <cppitertools/chunked.hpp>
 #include <cppitertools/sliding_window.hpp>
 
-int UMBRAL_OBJETIVO = 785;
+int UMBRAL_OBJETIVO = 520;
 
 /**
 * \brief Default constructor
@@ -242,7 +242,15 @@ void SpecificWorker::compute()
     auto [adv, rot, side] =  dwa.update(robot.get_robot_target_coordinates(), current_line, robot.get_current_advance_speed(), robot.get_current_rot_speed(), viewer);
 
     qInfo() << __FUNCTION__ << adv <<  side << rot;
-        try{ omnirobot_proxy->setSpeedBase(side, adv, rot); }
+        try{
+            if (robot.get_current_advance_speed() == 0 && robot.get_pure_rotation() == 0)
+            {
+                omnirobot_proxy->setSpeedBase(0, 0, 0);
+                sleep(1.2);
+            }
+            else
+                omnirobot_proxy->setSpeedBase(side, adv, rot);
+        }
        catch(const Ice::Exception &e){ std::cout << e.what() << "Error connecting to omnirobot" << std::endl;}
     // execute move commands
     //move_robot(force);
@@ -493,14 +501,19 @@ void SpecificWorker::search_state(const RoboCompYoloObjects::TObjects &objects)
         robot.set_current_target(*it); // Selecciona el objetivo
         state = State::APPROACHING; // Cambia al estado de acercamiento al objetivo
     }
+    robot.set_pure_rotation(0.7f);
 }
 
 void SpecificWorker::approach_state(const RoboCompYoloObjects::TObjects &objects, const std::vector<Eigen::Vector2f> &line)
 {
     // APPROACH STATE
     std::cout << "Approach State" << std::endl;
-    if(robot.get_distance_to_target() < UMBRAL_OBJETIVO)
+    robot.set_pure_rotation(0.0f);
+
+    if(robot.get_distance_to_target() < UMBRAL_OBJETIVO) {
+        robot.set_current_advance_speed(0.0f);
         state = State::SEARCHING; // Cambia al estado de búsqueda
+    }
     else
         if(auto it = std::find_if(objects.begin(), objects.end(),
                                   [r = robot](auto &a){return a.type == r.get_current_target().type;}); it != objects.end())
