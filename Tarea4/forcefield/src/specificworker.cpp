@@ -23,6 +23,7 @@
 #include <cppitertools/filter.hpp>
 #include <cppitertools/chunked.hpp>
 #include <cppitertools/sliding_window.hpp>
+#include <cppitertools/combinations_with_replacement.hpp>
 
 int UMBRAL_OBJETIVO = 520;
 
@@ -214,14 +215,19 @@ void SpecificWorker::compute()
 
     /// compute level_lines
     auto omni_lines = get_multi_level_3d_points_omni(omni_depth_frame);
-    //draw_floor_line(omni_lines, {1});
+    draw_floor_line(omni_lines, {1});
     auto current_line = omni_lines[1];  // second line of the list of laser lines at different heights
     //auto top_lines = get_multi_level_3d_points_top(top_depth_frame, top_camera.get_depth_focalx(), top_camera.get_depth_focaly());
-    auto top_lines  = top_camera.get_depth_lines_in_robot(0, 1600, 50, robot.get_tf_cam_to_base());
-    draw_floor_line(top_lines, {1});
+    //auto top_lines  = top_camera.get_depth_lines_in_robot(0, 1600, 50, robot.get_tf_cam_to_base());
+    //draw_floor_line(top_lines, {1});
 
     /// YOLO
     RoboCompYoloObjects::TObjects objects = yolo_detect_objects(top_rgb_frame);
+
+    // Door Detector
+    vector<Eigen::Vector2f> doors;
+    doors = DoorDetector(current_line);
+    drawDoors(doors);
 
     /// draw top image
     cv::imshow("top", top_rgb_frame); cv::waitKey(5);
@@ -241,6 +247,7 @@ void SpecificWorker::compute()
     qInfo()<< robot.get_robot_target_coordinates().x() <<robot.get_robot_target_coordinates().y()<<robot.get_robot_target_coordinates().z();
     auto [adv, rot, side] =  dwa.update(robot.get_robot_target_coordinates(), current_line, robot.get_current_advance_speed(), robot.get_current_rot_speed(), viewer);
 
+    /*
     qInfo() << __FUNCTION__ << adv <<  side << rot;
         try{
             if (robot.get_current_advance_speed() == 0 && robot.get_pure_rotation() == 0)
@@ -251,7 +258,7 @@ void SpecificWorker::compute()
             else
                 omnirobot_proxy->setSpeedBase(side, adv, rot);
         }
-       catch(const Ice::Exception &e){ std::cout << e.what() << "Error connecting to omnirobot" << std::endl;}
+       catch(const Ice::Exception &e){ std::cout << e.what() << "Error connecting to omnirobot" << std::endl;}*/
     // execute move commands
     //move_robot(force);
 
@@ -473,7 +480,6 @@ void SpecificWorker::move_robot(Eigen::Vector2f force)
 }
 
 ///////////////////  State machine ////////////////////////////////////////////
-
 void SpecificWorker::state_machine(const RoboCompYoloObjects::TObjects &objects, const std::vector<Eigen::Vector2f> &line)
 {
     switch (state)
@@ -521,6 +527,63 @@ void SpecificWorker::approach_state(const RoboCompYoloObjects::TObjects &objects
             robot.set_current_target(*it); // Actualiza el objetivo actual
         }
 }
+
+////////////////////// DOOR DERECTOR //////////////////////////////////////////
+vector<Eigen::Vector2f> SpecificWorker::DoorDetector(const vector<Eigen::Matrix<float, 2, 1>> line)
+{
+    std::vector<float> derivaties(line.size() - 1);
+
+    for(auto &&[i,d]:line | iter::sliding_window(2) | iter::enumerate)
+        derivaties[i] = (d[1].norm() - d[0].norm());
+
+    std::vector<std::tuple<int, bool>> pecks;
+
+    for(auto &&[i,d]:derivaties | iter::enumerate)
+    {
+        if (d > 1000) // Umbral
+            pecks.push_back(std::make_tuple(i, true));
+        else
+            pecks.push_back(std::make_tuple(i, false));
+    }
+
+    std::vector<Eigen::Vector2f> doors;
+    
+    for(auto &&p:pecks | iter::combinations_with_replacement(2))
+    {
+        auto &[p1, pos1] = p[0];
+        auto &[p2, pos2] = p[1];
+
+        auto v1 = line[p1];
+        auto v2 = line[p2];
+
+        if(((pos1 and !pos2) or (pos2 and !pos1)) and ((v1 - v2).norm() < 1000 and (v1 - v2).norm() > 600))
+            doors.push_back((v1 + v2) / 2);
+    }
+    return doors;
+}
+
+void SpecificWorker::drawDoors(const std::vector<Eigen::Vector2f> &doors_v)
+{
+    static std::vector<QGraphicsItem *> items;
+    for(const auto &item: items)
+        viewer->scene.removeItem(item);
+    items.clear();
+
+    for(auto &&[k, doors]: doors_v | iter::enumerate)
+    {
+        //qInfo() << __FUNCTION__ << k << (int)COLORS.row(k).x();
+        QColor color("magenta");
+        QBrush brush(color);
+        QPen pen(color);
+        for(const auto &p: doors_v)
+        {
+            auto item = viewer->scene.addEllipse(-100, -100, 200, 200, pen, brush);
+            item->setPos(p.x(), p.y());
+            items.push_back(item);
+        }
+    }
+}
+
 
 ///////////////////// Aux //////////////////////////////////////////////////////////////////
 float SpecificWorker::closest_distance_ahead(const std::vector<Eigen::Vector2f> &line)

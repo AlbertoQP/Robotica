@@ -122,6 +122,11 @@ class SpecificWorker : public GenericWorker
     void set_target_force(const Eigen::Vector3f &vec);
     Eigen::Vector3f target_coordinates{0.f, 0.f, 0.f};  //third component for pure  rotations
 
+    // Door Detector
+    vector<Eigen::Vector2f> DoorDetector(const vector<Eigen::Matrix<float, 2, 1>>);
+
+    void drawDoors(const std::vector<Eigen::Vector2f> &doors_v);
+
     // state machine
     void state_machine(const RoboCompYoloObjects::TObjects &objects, const std::vector<Eigen::Vector2f> &line);
     enum class State {IDLE, SEARCHING, APPROACHING, WAITING};
