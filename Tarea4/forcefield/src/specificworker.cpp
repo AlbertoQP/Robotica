@@ -540,14 +540,14 @@ vector<Eigen::Vector2f> SpecificWorker::DoorDetector(const vector<Eigen::Matrix<
 
     for(auto &&[i,d]:derivaties | iter::enumerate)
     {
-        if (d > 1000) // Umbral
+        if (d > 1500) // Umbral
             pecks.push_back(std::make_tuple(i, true));
         else
             pecks.push_back(std::make_tuple(i, false));
     }
 
     std::vector<Eigen::Vector2f> doors;
-    
+
     for(auto &&p:pecks | iter::combinations_with_replacement(2))
     {
         auto &[p1, pos1] = p[0];
@@ -556,7 +556,7 @@ vector<Eigen::Vector2f> SpecificWorker::DoorDetector(const vector<Eigen::Matrix<
         auto v1 = line[p1];
         auto v2 = line[p2];
 
-        if(((pos1 and !pos2) or (pos2 and !pos1)) and ((v1 - v2).norm() < 1000 and (v1 - v2).norm() > 600))
+        if(((pos1 and !pos2) or (pos2 and !pos1)) and ((v1 - v2).norm() < 1500 and (v1 - v2).norm() > 600))
             doors.push_back((v1 + v2) / 2);
     }
     return doors;
