@@ -38,6 +38,8 @@
 #include <timer/timer.h>
 #include "robot.h"
 #include "camera.h"
+#include "door_detector.h"
+
 
 class SpecificWorker : public GenericWorker
 {
@@ -123,8 +125,7 @@ class SpecificWorker : public GenericWorker
     Eigen::Vector3f target_coordinates{0.f, 0.f, 0.f};  //third component for pure  rotations
 
     // Door Detector
-    vector<Eigen::Vector2f> DoorDetector(const vector<Eigen::Matrix<float, 2, 1>>);
-
+    Door_detector door_detector;
     void drawDoors(const std::vector<Eigen::Vector2f> &doors_v);
 
     // state machine
@@ -146,7 +147,6 @@ class SpecificWorker : public GenericWorker
 
     // Clock
     rc::Timer<> clock;
-
 
 
 };

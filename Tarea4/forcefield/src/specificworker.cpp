@@ -79,7 +79,7 @@ void SpecificWorker::initialize(int period)
         // sets servo to zero position
         // TODO: pasar a Robot
         RoboCompJointMotorSimple::MotorState servo_state;
-        while(true)
+     /*   while(true)
             try
             {
                 servo_state = jointmotorsimple_proxy->getMotorState("camera_pan_joint");
@@ -88,7 +88,7 @@ void SpecificWorker::initialize(int period)
                 usleep(100000);
             }
             catch(const Ice::Exception &e){ std::cout << e.what() << std::endl; return;}
-
+*/
         // camera position wrt to robot
         Eigen::Transform<float, 3, Eigen::Affine> tf(Eigen::Translation3f(Eigen::Vector3f{0.f, 0.f, consts.top_camera_height}) *
                                                      Eigen::AngleAxisf(consts.camera_tilt_angle, Eigen::Vector3f::UnitX()) *
@@ -225,9 +225,8 @@ void SpecificWorker::compute()
     RoboCompYoloObjects::TObjects objects = yolo_detect_objects(top_rgb_frame);
 
     // Door Detector
-    vector<Eigen::Vector2f> doors;
-    doors = DoorDetector(current_line);
-    drawDoors(doors);
+     auto doors = door_detector.detector(current_line);
+     door_detector.draw_doors(doors, viewer);
 
     /// draw top image
     cv::imshow("top", top_rgb_frame); cv::waitKey(5);
@@ -387,7 +386,8 @@ std::vector<std::vector<Eigen::Vector2f>> SpecificWorker::get_multi_level_3d_poi
                     // maps -pi:pi to 0:360, with 0 in the middle of the array
                     int ang_index = floor((M_PI + atan2(x, y)) / ang_bin);
                     Eigen::Vector2f new_point(x, y);
-                    if(new_point.norm() <  points[level][ang_index].norm() and new_point.norm() > consts.min_dist_from_robot_center)
+                    if(new_point.norm() <  points[level][ang_index].norm() and
+                            new_point.norm() > consts.min_dist_from_robot_center  and new_point.norm() > 0)
                         points[level][ang_index] = new_point;
                 }
         };
@@ -528,61 +528,8 @@ void SpecificWorker::approach_state(const RoboCompYoloObjects::TObjects &objects
         }
 }
 
-////////////////////// DOOR DERECTOR //////////////////////////////////////////
-vector<Eigen::Vector2f> SpecificWorker::DoorDetector(const vector<Eigen::Matrix<float, 2, 1>> line)
-{
-    std::vector<float> derivaties(line.size() - 1);
 
-    for(auto &&[i,d]:line | iter::sliding_window(2) | iter::enumerate)
-        derivaties[i] = (d[1].norm() - d[0].norm());
 
-    std::vector<std::tuple<int, bool>> pecks;
-
-    for(auto &&[i,d]:derivaties | iter::enumerate)
-    {
-        if (d > 1500) // Umbral
-            pecks.push_back(std::make_tuple(i, true));
-        else
-            pecks.push_back(std::make_tuple(i, false));
-    }
-
-    std::vector<Eigen::Vector2f> doors;
-
-    for(auto &&p:pecks | iter::combinations_with_replacement(2))
-    {
-        auto &[p1, pos1] = p[0];
-        auto &[p2, pos2] = p[1];
-
-        auto v1 = line[p1];
-        auto v2 = line[p2];
-
-        if(((pos1 and !pos2) or (pos2 and !pos1)) and ((v1 - v2).norm() < 1500 and (v1 - v2).norm() > 600))
-            doors.push_back((v1 + v2) / 2);
-    }
-    return doors;
-}
-
-void SpecificWorker::drawDoors(const std::vector<Eigen::Vector2f> &doors_v)
-{
-    static std::vector<QGraphicsItem *> items;
-    for(const auto &item: items)
-        viewer->scene.removeItem(item);
-    items.clear();
-
-    for(auto &&[k, doors]: doors_v | iter::enumerate)
-    {
-        //qInfo() << __FUNCTION__ << k << (int)COLORS.row(k).x();
-        QColor color("magenta");
-        QBrush brush(color);
-        QPen pen(color);
-        for(const auto &p: doors_v)
-        {
-            auto item = viewer->scene.addEllipse(-100, -100, 200, 200, pen, brush);
-            item->setPos(p.x(), p.y());
-            items.push_back(item);
-        }
-    }
-}
 
 
 ///////////////////// Aux //////////////////////////////////////////////////////////////////
