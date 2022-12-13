@@ -25,7 +25,7 @@
 #include <cppitertools/sliding_window.hpp>
 #include <cppitertools/combinations_with_replacement.hpp>
 
-int UMBRAL_OBJETIVO = 520;
+
 
 /**
 * \brief Default constructor
@@ -236,7 +236,7 @@ void SpecificWorker::compute()
 
     // TODO:: STATE MACHINE
     // state machine to activate basic behaviours. Returns a  target_coordinates vector
-    state_machine(objects, current_line);
+    state_machine.statemachine(objects, current_line, robot);
 
     /// eye tracking: tracks  current selected object or  IOR if none
     //eye_track(robot);
@@ -480,56 +480,6 @@ void SpecificWorker::move_robot(Eigen::Vector2f force)
 }
 
 ///////////////////  State machine ////////////////////////////////////////////
-void SpecificWorker::state_machine(const RoboCompYoloObjects::TObjects &objects, const std::vector<Eigen::Vector2f> &line)
-{
-    switch (state)
-    {
-        case State::IDLE:
-            state = State::SEARCHING;
-            break;
-        case State::SEARCHING:
-            search_state(objects);
-            break;
-        case State::APPROACHING:
-            approach_state(objects, line);
-            break;
-    }
-}
-
-void SpecificWorker::search_state(const RoboCompYoloObjects::TObjects &objects)
-{
-    // SEARCHING STATE
-    std::cout << "Searching" << std::endl;
-
-    if(auto it = std::find_if_not(objects.begin(), objects.end(),
-                                  [r = robot](auto &a){return a.type == r.get_current_target().type;}); it != objects.end())
-    {
-        robot.set_current_target(*it); // Selecciona el objetivo
-        state = State::APPROACHING; // Cambia al estado de acercamiento al objetivo
-    }
-    robot.set_pure_rotation(0.7f);
-}
-
-void SpecificWorker::approach_state(const RoboCompYoloObjects::TObjects &objects, const std::vector<Eigen::Vector2f> &line)
-{
-    // APPROACH STATE
-    std::cout << "Approach State" << std::endl;
-    robot.set_pure_rotation(0.0f);
-
-    if(robot.get_distance_to_target() < UMBRAL_OBJETIVO) {
-        robot.set_current_advance_speed(0.0f);
-        state = State::SEARCHING; // Cambia al estado de búsqueda
-    }
-    else
-        if(auto it = std::find_if(objects.begin(), objects.end(),
-                                  [r = robot](auto &a){return a.type == r.get_current_target().type;}); it != objects.end())
-        {
-            robot.set_current_target(*it); // Actualiza el objetivo actual
-        }
-}
-
-
-
 
 
 ///////////////////// Aux //////////////////////////////////////////////////////////////////

@@ -39,7 +39,7 @@
 #include "robot.h"
 #include "camera.h"
 #include "door_detector.h"
-
+#include "state_machine.h"
 
 class SpecificWorker : public GenericWorker
 {
@@ -126,14 +126,10 @@ class SpecificWorker : public GenericWorker
 
     // Door Detector
     Door_detector door_detector;
-    void drawDoors(const std::vector<Eigen::Vector2f> &doors_v);
 
     // state machine
-    void state_machine(const RoboCompYoloObjects::TObjects &objects, const std::vector<Eigen::Vector2f> &line);
-    enum class State {IDLE, SEARCHING, APPROACHING, WAITING};
-    State state = State::SEARCHING;
-    void search_state(const RoboCompYoloObjects::TObjects &objects);
-    void approach_state(const RoboCompYoloObjects::TObjects &objects, const std::vector<Eigen::Vector2f> &line);
+    State_machine state_machine;
+
     //Eigen::Vector3f wait_state();
 
     float iou(const RoboCompYoloObjects::TBox &a, const RoboCompYoloObjects::TBox &b);
