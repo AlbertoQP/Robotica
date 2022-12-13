@@ -8,6 +8,7 @@ SET ( SOURCES
   camera.cpp
   door_detector.cpp
   state_machine.cpp
+  graph.cpp
 )
 
 # Headers set
