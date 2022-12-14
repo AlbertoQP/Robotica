@@ -40,6 +40,7 @@
 #include "camera.h"
 #include "door_detector.h"
 #include "state_machine.h"
+#include "generic_object.h"
 
 class SpecificWorker : public GenericWorker
 {

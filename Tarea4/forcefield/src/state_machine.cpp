@@ -7,7 +7,7 @@
 
 int UMBRAL_OBJETIVO = 520;
 
-void State_machine::statemachine(const RoboCompYoloObjects::TObjects &objects, const std::vector<Eigen::Vector2f> &line, const rc::Robot robot)
+void State_machine::statemachine(const std::vector<Object> &objects, const rc::Robot robot)
 {
     switch (state)
     {
@@ -18,12 +18,12 @@ void State_machine::statemachine(const RoboCompYoloObjects::TObjects &objects, c
             search_state(objects, robot);
             break;
         case State::APPROACHING:
-            approach_state(objects, line, robot);
+            approach_state(objects, robot);
             break;
     }
 }
 
-void State_machine::search_state(const RoboCompYoloObjects::TObjects &objects, rc::Robot robot)
+void State_machine::search_state(const std::vector<Object> &objects, rc::Robot robot)
 {
     // SEARCHING STATE
     std::cout << "Searching" << std::endl;
@@ -37,7 +37,7 @@ void State_machine::search_state(const RoboCompYoloObjects::TObjects &objects, r
     robot.set_pure_rotation(0.7f);
 }
 
-void State_machine::approach_state(const RoboCompYoloObjects::TObjects &objects, const std::vector<Eigen::Vector2f> &line, rc::Robot robot)
+void State_machine::approach_state(const std::vector<Object> &objects, rc::Robot robot)
 {
     // APPROACH STATE
     std::cout << "Approach State" << std::endl;

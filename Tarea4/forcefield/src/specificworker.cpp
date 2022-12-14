@@ -228,6 +228,8 @@ void SpecificWorker::compute()
      auto doors = door_detector.detector(current_line);
      door_detector.draw_doors(doors, viewer);
 
+    std::vector<Object> objects_vector = Object::createFinalList(Object::createList(doors), Object::createList(objects));
+
     /// draw top image
     cv::imshow("top", top_rgb_frame); cv::waitKey(5);
 
@@ -236,7 +238,7 @@ void SpecificWorker::compute()
 
     // TODO:: STATE MACHINE
     // state machine to activate basic behaviours. Returns a  target_coordinates vector
-    state_machine.statemachine(objects, current_line, robot);
+    state_machine.statemachine(objects_vector, robot);
 
     /// eye tracking: tracks  current selected object or  IOR if none
     //eye_track(robot);
