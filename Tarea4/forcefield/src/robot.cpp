@@ -52,6 +52,13 @@ namespace rc
         current_target = target;
         has_target_flag = true;
     }
+
+    void Robot::set_current_target_obj(const Object &object)
+    {
+        current_target_obj = object;
+        has_target_flag = true;
+    }
+
     void Robot::set_has_target(bool val)
     {
         has_target_flag = val;
@@ -94,6 +101,12 @@ namespace rc
     {
         return current_target;
     }
+
+    Object Robot::get_current_target_obj() const
+    {
+        return current_target_obj;
+    }
+
     void Robot::set_desired_distance_to_target(float dist)
     {
         min_distance_to_target = dist;
@@ -233,6 +246,20 @@ namespace rc
         { std::cout << e.what() << " Error reading omnirobot_proxy::getBaseSpeed" << std::endl; }
     }
 
+    void Robot::goto_target()
+    {
+
+    }
+
+    void Robot::stop()
+    {
+        omnirobot_proxy->setSpeedBase(0,0,0); // Stop the robot
+        has_target_flag = false;
+    }
+    void Robot::rotate(float rotation_velocity)
+    {
+        set_pure_rotation(rotation_velocity);
+    }
 
 } // rc
 

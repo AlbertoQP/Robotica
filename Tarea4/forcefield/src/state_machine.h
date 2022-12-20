@@ -27,8 +27,10 @@ public:
     enum class State {IDLE, SEARCHING, APPROACHING, WAITING};
     State state = State::SEARCHING;
     void statemachine(const std::vector<Object> &objects, const rc::Robot robot);
-    void search_state(const std::vector<Object> &objects, rc::Robot robot);
+    void search_state(Object objects, rc::Robot robot);
     void approach_state(const std::vector<Object> &objects, rc::Robot robot);
+
+    void search_state(const vector<Object> &objects, rc::Robot robot);
 };
 
 

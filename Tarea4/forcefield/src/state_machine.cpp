@@ -29,9 +29,9 @@ void State_machine::search_state(const std::vector<Object> &objects, rc::Robot r
     std::cout << "Searching" << std::endl;
 
     if(auto it = std::find_if_not(objects.begin(), objects.end(),
-                                  [r = robot](auto &a){return a.type == r.get_current_target().type;}); it != objects.end())
+                                  [r = robot](Object a){return a.get_obj().type == r.get_current_target_obj().get_obj().type;}); it != objects.end())
     {
-        robot.set_current_target(*it); // Selecciona el objetivo
+        robot.set_current_target_obj(*it); // Selecciona el objetivo
         state = State::APPROACHING; // Cambia al estado de acercamiento al objetivo
     }
     robot.set_pure_rotation(0.7f);
@@ -49,8 +49,8 @@ void State_machine::approach_state(const std::vector<Object> &objects, rc::Robot
     }
     else
     if(auto it = std::find_if(objects.begin(), objects.end(),
-                              [r = robot](auto &a){return a.type == r.get_current_target().type;}); it != objects.end())
+                              [r = robot](Object a){return a.get_obj().type == r.get_current_target().type;}); it != objects.end())
     {
-        robot.set_current_target(*it); // Actualiza el objetivo actual
+        robot.set_current_target_obj(*it); // Actualiza el objetivo actual
     }
 }

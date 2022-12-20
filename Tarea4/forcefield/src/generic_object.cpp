@@ -6,28 +6,26 @@
 
 Object::Object(const Door_detector::Door &d)
 {
-    id = 81;
-    x = d.pcenter.x();
-    y = d.pcenter.y();
-    z = 0;
+    obj.id = 81;
+    obj.x = d.pcenter.x();
+    obj.y = d.pcenter.y();
+    obj.z = 0;
 }
 
 Object::Object(const RoboCompYoloObjects::TBox &Tbox)
 {
-     id = Tbox.id;
-     type = Tbox.type;
-     left = Tbox.left;
-     top = Tbox.top;
-     right = Tbox.right;
-     bot = Tbox.bot;
-     score = Tbox.score;
-     depth = Tbox.depth;
-     x = Tbox.x;
-     y = Tbox.y;
-     z = Tbox.z;
-
+    obj.id = Tbox.id;
+    obj.type = Tbox.type;
+    obj.left = Tbox.left;
+    obj.top = Tbox.top;
+    obj.right = Tbox.right;
+    obj.bot = Tbox.bot;
+    obj.score = Tbox.score;
+    obj.depth = Tbox.depth;
+    obj.x = Tbox.x;
+    obj.y = Tbox.y;
+    obj.z = Tbox.z;
 }
-Object::Object() {}
 
 std::vector<Object> Object::createList(const std::vector<RoboCompYoloObjects::TBox> &tObjects)
 {
@@ -63,5 +61,7 @@ std::vector<Object> Object::createFinalList(std::vector<Object> doors, std::vect
 
 std::tuple<float, float> Object::getObjectCoords()
 {
-    return std::make_tuple(x, y);
+    return std::make_tuple(obj.x, obj.y);
 }
+
+const Object::Obj Object::get_obj() { return obj; }
