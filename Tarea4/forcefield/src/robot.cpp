@@ -47,16 +47,11 @@ namespace rc
     {
         camera_pan_angle = std::clamp(pan, min_pan_angle, max_pan_angle);
     }
-    void Robot::set_current_target(const RoboCompYoloObjects::TBox &target)
+    void Robot::set_current_target(const rc::PreObject &target)
     {
         current_target = target;
         has_target_flag = true;
-    }
-
-    void Robot::set_current_target_obj(const Object &object)
-    {
-        current_target_obj = object;
-        has_target_flag = true;
+        pure_rotation = 0;
     }
 
     void Robot::set_has_target(bool val)
@@ -70,6 +65,10 @@ namespace rc
     {
         return has_target_flag;
     }
+
+    bool Robot::is_forward() { return forward; }
+
+    void Robot::set_is_forward(bool _forward) { forward = _forward; }
 
     void Robot::set_pure_rotation(float rot)
     {
@@ -97,14 +96,10 @@ namespace rc
     {
         return camera_pan_angle;
     }
-    RoboCompYoloObjects::TBox Robot::get_current_target() const
+
+    rc::PreObject Robot::get_current_target() const
     {
         return current_target;
-    }
-
-    Object Robot::get_current_target_obj() const
-    {
-        return current_target_obj;
     }
 
     void Robot::set_desired_distance_to_target(float dist)
@@ -246,9 +241,47 @@ namespace rc
         { std::cout << e.what() << " Error reading omnirobot_proxy::getBaseSpeed" << std::endl; }
     }
 
-    void Robot::goto_target()
+    void Robot::goto_target(const std::vector<Eigen::Vector2f> &current_line, AbstractGraphicViewer *viewer)
     {
+        float adv, rot, side;
 
+        if (pure_rotation > 0.0f)
+        {
+            side = 0;
+            rot = pure_rotation;
+            adv = 0;
+        }
+        else if (has_target_flag)
+        {
+            if(forward)
+            {
+                // DWA algorithm
+                auto [adv1, rot1, side1] = dwa.update(get_robot_target_coordinates(), current_line,
+                                                      get_current_advance_speed(), get_current_rot_speed(), viewer);
+                side = side1;
+                rot = 0;
+                adv = 600;
+            }
+            else
+            {
+                // DWA algorithm
+                auto [adv1, rot1, side1] = dwa.update(get_robot_target_coordinates(), current_line,
+                                                      get_current_advance_speed(), get_current_rot_speed(), viewer);
+                side = side1;
+                rot = rot1;
+                adv = adv1;
+            }
+        }
+        else
+        {
+            side=0;
+            rot=0;
+            adv=0;
+        }
+
+        //print();
+        try{ omnirobot_proxy->setSpeedBase(side, adv, rot); }
+        catch(const Ice::Exception &e){ std::cout << e.what() << "Error connecting to omnirobot" << std::endl;}
     }
 
     void Robot::stop()

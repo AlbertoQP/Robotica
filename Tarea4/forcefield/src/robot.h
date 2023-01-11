@@ -13,7 +13,8 @@
 #include "camera.h"
 #include <JointMotorSimple.h>
 #include <OmniRobot.h>
-#include "generic_object.h"
+#include <dynamic_window.h>
+#include "preobject.h"
 
 namespace rc
 {
@@ -36,8 +37,7 @@ namespace rc
                 float get_current_rot_speed() const;
                 float get_target_angle_in_frame() const;
                 float get_current_pan_angle() const;
-                RoboCompYoloObjects::TBox get_current_target() const;
-                Object get_current_target_obj() const;
+                rc::PreObject get_current_target() const;
                 float get_distance_to_target();
                 Eigen::Transform<float, 3, Eigen::Affine> get_tf_cam_to_base();
                 float get_pure_rotation() const;
@@ -48,15 +48,16 @@ namespace rc
                 void set_current_advance_speed(float adv);
                 void set_current_rot_speed(float rot);
                 void set_current_pan_angle(float pan);
-                void set_current_target(const RoboCompYoloObjects::TBox &target);
-                void set_current_target_obj(const Object &object);
+                void set_current_target(const rc::PreObject &target);
                 void set_has_target(bool val);
                 void set_pure_rotation(float rot);
                 bool has_target() const;
+                void set_is_forward(bool forward);
+                bool is_forward();
                 void set_desired_distance_to_target(float dist); //mm
 
                 //NEW
-                void goto_target();
+                void goto_target(const std::vector<Eigen::Vector2f> &current_line, AbstractGraphicViewer *viewer);
                 void stop();
                 void rotate(float rotation_velocity);
 
@@ -83,11 +84,14 @@ namespace rc
                 RoboCompJointMotorSimple::JointMotorSimplePrxPtr joint_motor_proxy;
                 RoboCompOmniRobot::OmniRobotPrxPtr omnirobot_proxy;
                 float pure_rotation = 0.f;
-                RoboCompYoloObjects::TBox current_target{.type = -1};
-                Object current_target_obj;
+                rc::PreObject current_target;
                 bool has_target_flag = false;
+                bool forward = false;
                 std::map<float, float> bumper;
                 Eigen::ArrayXf sector1, sector2, sector3,  sector4, sector5;
+
+                // DWA
+                Dynamic_Window dwa;
 
                 void recompute_bumper(float dynamic_offset);
 

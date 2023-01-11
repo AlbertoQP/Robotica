@@ -222,23 +222,30 @@ void SpecificWorker::compute()
     //draw_floor_line(top_lines, {1});
 
     /// YOLO
-    RoboCompYoloObjects::TObjects objects = yolo_detect_objects(top_rgb_frame);
+    RoboCompYoloObjects::TObjects yolo_Objects = yolo_detect_objects(top_rgb_frame);
 
-    // Door Detector
-     auto doors = door_detector.detector(current_line);
-     door_detector.draw_doors(doors, viewer);
+    /// Door Detector
+    auto doors = door_detector.detector(current_line);
+    door_detector.draw_doors(doors, viewer);
 
-    std::vector<Object> objects_vector = Object::createFinalList(Object::createList(doors), Object::createList(objects));
+    objectsVector.clear();
+
+    auto yoloObjs = rc::PreObject::add_yolo(yolo_Objects, robot.get_tf_cam_to_base());
+    objectsVector.insert(objectsVector.end(), yoloObjs.begin(), yoloObjs.end());
+
+    auto doorsObjs = rc::PreObject::add_doors(doors);
+    objectsVector.insert(objectsVector.end(), doorsObjs.begin(), doorsObjs.end());
 
     /// draw top image
     cv::imshow("top", top_rgb_frame); cv::waitKey(5);
 
     /// draw yolo_objects on 2D view
-    draw_objects_on_2dview(objects, RoboCompYoloObjects::TBox());
+    draw_objects_on_2dview(yolo_Objects, RoboCompYoloObjects::TBox());
 
     // TODO:: STATE MACHINE
     // state machine to activate basic behaviours. Returns a  target_coordinates vector
-    state_machine.statemachine(objects_vector, robot);
+    state_machine.statemachine(objectsVector, robot);
+    robot.goto_target(current_line, viewer);
 
     /// eye tracking: tracks  current selected object or  IOR if none
     //eye_track(robot);
@@ -532,8 +539,10 @@ float SpecificWorker::gaussian(float x)
 void SpecificWorker::draw_floor_line(const vector<vector<Eigen::Vector2f>> &lines, std::initializer_list<int> list)    //one vector for each height level
 {
     static std::vector<QGraphicsItem *> items;
-    for(const auto &item: items)
+    for(const auto &item: items) {
         viewer->scene.removeItem(item);
+        delete (item);
+    }
     items.clear();
 
     if(list.size() > lines.size()) {qWarning()<< "Requested list bigger than data. Returning"; return;}

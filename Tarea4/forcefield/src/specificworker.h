@@ -40,7 +40,7 @@
 #include "camera.h"
 #include "door_detector.h"
 #include "state_machine.h"
-#include "generic_object.h"
+#include "preobject.h"
 
 class SpecificWorker : public GenericWorker
 {
@@ -127,6 +127,9 @@ class SpecificWorker : public GenericWorker
 
     // Door Detector
     Door_detector door_detector;
+
+    // Objects
+    std::vector<rc::PreObject> objectsVector;
 
     // state machine
     State_machine state_machine;
