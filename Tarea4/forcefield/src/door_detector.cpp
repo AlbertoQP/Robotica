@@ -9,9 +9,8 @@
 #include <cppitertools/chunked.hpp>
 #include <cppitertools/sliding_window.hpp>
 #include <cppitertools/combinations_with_replacement.hpp>
-////////////////////// DOOR DERECTOR //////////////////////////////////////////
 
-
+////////////////////// DOOR DETECTOR //////////////////////////////////////////
 std::vector<Door_detector::Door> Door_detector::detector(const std::vector<Eigen::Vector2f> &line)
 {
     std::vector<float> derivaties(line.size() - 1);

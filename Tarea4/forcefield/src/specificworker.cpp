@@ -252,8 +252,8 @@ void SpecificWorker::compute()
     //draw_top_camera_optic_ray();
 
     // DWA algorithm
-    qInfo()<< robot.get_robot_target_coordinates().x() <<robot.get_robot_target_coordinates().y()<<robot.get_robot_target_coordinates().z();
-    auto [adv, rot, side] =  dwa.update(robot.get_robot_target_coordinates(), current_line, robot.get_current_advance_speed(), robot.get_current_rot_speed(), viewer);
+    //qInfo()<< robot.get_robot_target_coordinates().x() <<robot.get_robot_target_coordinates().y()<<robot.get_robot_target_coordinates().z();
+    //auto [adv, rot, side] =  dwa.update(robot.get_robot_target_coordinates(), current_line, robot.get_current_advance_speed(), robot.get_current_rot_speed(), viewer);
 
     /*
     qInfo() << __FUNCTION__ << adv <<  side << rot;

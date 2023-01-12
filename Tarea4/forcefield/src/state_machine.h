@@ -24,13 +24,13 @@
 
 class State_machine {
 public:
-    enum class State {IDLE, SEARCHING, APPROACHING, WAITING};
+    enum class State {IDLE, SEARCHING, APPROACHING, CROSSING};
     State state = State::SEARCHING;
     void statemachine(const std::vector<rc::PreObject> objects, rc::Robot &robot); //ADD GRAPH
 
     void search_state(const std::vector<rc::PreObject> objects, rc::Robot &robot);
     void approach_state(const std::vector<rc::PreObject> objects, rc::Robot &robot);
-    // ADD CROSS METHOD AND STATE
+    void cross_state(rc::Robot &robot);
     void idle_state(); //ADD GRAPH
 };
 

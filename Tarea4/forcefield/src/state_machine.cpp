@@ -5,14 +5,14 @@
 #include "state_machine.h"
 #include "specificworker.h"
 
-int UMBRAL_OBJETIVO = 150;
+int UMBRAL_OBJETIVO = 525;
 
 void State_machine::statemachine(const std::vector<rc::PreObject> objects, rc::Robot &robot)
 {
     switch (state)
     {
         case State::IDLE:
-            // GO TO IDLE STATE
+            state = State::SEARCHING;
             break;
         case State::SEARCHING:
             search_state(objects, robot);
@@ -20,7 +20,9 @@ void State_machine::statemachine(const std::vector<rc::PreObject> objects, rc::R
         case State::APPROACHING:
             approach_state(objects, robot);
             break;
-        // ADD CROSS STATE
+        case State::CROSSING:
+            cross_state(robot);
+            break;
     }
 }
 
@@ -28,6 +30,7 @@ void State_machine::search_state(const std::vector<rc::PreObject> objects, rc::R
 {
     // SEARCHING STATE
     std::cout << "Searching" << std::endl;
+    std::cout << objects.size() << std::endl;
 
     if(auto it = std::ranges::find_if_not(objects.begin(), objects.end(),
                                   [r = robot](auto &a){return a.type == r.get_current_target().type;}); it != objects.end() && it->type == 80)
@@ -48,8 +51,7 @@ void State_machine::approach_state(const std::vector<rc::PreObject> objects, rc:
 
     if (robot.get_distance_to_target() < UMBRAL_OBJETIVO)
     {
-        // CROSS STATE
-        std::cout << "Crossing" << std::endl;
+        state = State::CROSSING;
     }
     else
     if(auto it = std::ranges::find_if(objects.begin(), objects.end(),
@@ -59,3 +61,27 @@ void State_machine::approach_state(const std::vector<rc::PreObject> objects, rc:
         std::cout << "Nuevo target: " << robot.get_current_target().type;
     }
 }
+void State_machine::cross_state(rc::Robot &robot)
+{
+    std::cout << "Crossing" << std::endl;
+
+    static std::chrono::time_point<std::chrono::system_clock> start_chrono;
+    static bool first_time = true;
+
+    if (first_time)
+    {
+        start_chrono = std::chrono::system_clock::now();
+        first_time = false;
+    }
+
+    auto end_chrono = std::chrono::system_clock::now();
+    std::chrono::duration<float, std::milli> duration = end_chrono - start_chrono;
+
+    if (duration.count() > 1600)
+    {
+        robot.set_has_target(false);
+        state = State::SEARCHING;
+        first_time = true;
+    }
+}
+
