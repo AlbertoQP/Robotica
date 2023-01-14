@@ -5,13 +5,14 @@
 #include "state_machine.h"
 #include "specificworker.h"
 
-int UMBRAL_OBJETIVO = 525;
+int UMBRAL_OBJETIVO = 100;
 
 void State_machine::statemachine(const std::vector<rc::PreObject> objects, rc::Robot &robot)
 {
     switch (state)
     {
         case State::IDLE:
+            first_time = true;
             state = State::SEARCHING;
             break;
         case State::SEARCHING:
@@ -58,7 +59,7 @@ void State_machine::approach_state(const std::vector<rc::PreObject> objects, rc:
                               [r = robot](auto &a){return a.type == r.get_current_target().type;}); it != objects.end())
     {
         robot.set_current_target(*it); // Actualiza el objetivo actual
-        std::cout << "Nuevo target: " << robot.get_current_target().type;
+        std::cout << "Nuevo target: " << robot.get_current_target().type << "; ";
     }
 }
 void State_machine::cross_state(rc::Robot &robot)
@@ -66,7 +67,7 @@ void State_machine::cross_state(rc::Robot &robot)
     std::cout << "Crossing" << std::endl;
 
     static std::chrono::time_point<std::chrono::system_clock> start_chrono;
-    static bool first_time = true;
+    //static bool first_time = true;
 
     if (first_time)
     {

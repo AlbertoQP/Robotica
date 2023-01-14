@@ -11,12 +11,12 @@ namespace rc
     {
     public:
         PreObject() = default;
-        PreObject(const Door_detector::Door &d);
+        PreObject(const DoorDetector::Door &d);
         PreObject(const RoboCompYoloObjects::TBox &box, const Eigen::Transform<float, 3, Eigen::Affine> &tf);
         Eigen::Vector3f get_robot_coordinates() const;
         Eigen::Vector3f get_local_coordinates() const;
         void print() const;
-        static std::vector<PreObject> add_doors(const std::vector<Door_detector::Door> &doors);
+        static std::vector<PreObject> add_doors(const std::vector<DoorDetector::Door> &doors);
         static std::vector<PreObject> add_yolo(const std::vector<RoboCompYoloObjects::TBox> &boxes, const Eigen::Transform<float, 3, Eigen::Affine> &tf);
 
         int id = 0;         // 0:person     81:door

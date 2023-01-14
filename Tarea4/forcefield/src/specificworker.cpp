@@ -26,7 +26,6 @@
 #include <cppitertools/combinations_with_replacement.hpp>
 
 
-
 /**
 * \brief Default constructor
 */
@@ -221,14 +220,14 @@ void SpecificWorker::compute()
     //auto top_lines  = top_camera.get_depth_lines_in_robot(0, 1600, 50, robot.get_tf_cam_to_base());
     //draw_floor_line(top_lines, {1});
 
+    objectsVector.clear();
+
     /// YOLO
     RoboCompYoloObjects::TObjects yolo_Objects = yolo_detect_objects(top_rgb_frame);
 
     /// Door Detector
-    auto doors = door_detector.detector(current_line);
-    door_detector.draw_doors(doors, viewer);
-
-    objectsVector.clear();
+    auto doors = door_detector.detect(omni_lines, viewer);
+    //door_detector.draw_doors(doors, viewer);
 
     auto yoloObjs = rc::PreObject::add_yolo(yolo_Objects, robot.get_tf_cam_to_base());
     objectsVector.insert(objectsVector.end(), yoloObjs.begin(), yoloObjs.end());
@@ -457,7 +456,7 @@ void SpecificWorker::eye_track(rc::Robot &robot)
             {
                 float new_vel = -hor_angle + 0.3 * (hor_angle - error_ant);
                 //new_vel = std::clamp(new_vel, -1.f, 1.f);  // dumping
-                new_vel -= 0.5 * robot.get_current_rot_speed();  // compensate with current base rotation speed
+                new_vel -= 0.5 * robot.get_pure_rotation();  // compensate with current base rotation speed
                 //qInfo() << __FUNCTION__ << "image error" << hor_angle << "smooth vel: " << new_vel;
                 jointmotorsimple_proxy->setVelocity("camera_pan_joint", RoboCompJointMotorSimple::MotorGoalVelocity{new_vel, 1});
                 //qInfo() << __FUNCTION__ << "smooth" << hor_angle << current_servo_angle << new_vel;

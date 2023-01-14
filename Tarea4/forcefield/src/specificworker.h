@@ -126,7 +126,7 @@ class SpecificWorker : public GenericWorker
     Eigen::Vector3f target_coordinates{0.f, 0.f, 0.f};  //third component for pure  rotations
 
     // Door Detector
-    Door_detector door_detector;
+    DoorDetector door_detector;
 
     // Objects
     std::vector<rc::PreObject> objectsVector;

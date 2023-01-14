@@ -12,14 +12,14 @@ namespace rc
         ry = rc.y();
         rz = rc.z();
     }
-    PreObject::PreObject(const Door_detector::Door &d)
+    PreObject::PreObject(const DoorDetector::Door &d)
     {
         type = 80;  // door
-        rx = d.pcenter.x();
-        ry = d.pcenter.y();
+        rx = d.center_floor.x();
+        ry = d.center_floor.y();
         rz = 0.f;
-        x = d.pcenter.x();
-        y = d.pcenter.y();
+        x = d.center_floor.x();
+        y = d.center_floor.y();
         z = 0.f;
     }
     std::vector<PreObject> PreObject::add_yolo(const std::vector<RoboCompYoloObjects::TBox> &boxes, const  Eigen::Transform<float, 3, Eigen::Affine> &tf )
@@ -29,7 +29,7 @@ namespace rc
             bobjs.emplace_back(PreObject(b, tf));
         return bobjs;
     }
-    std::vector<PreObject> PreObject::add_doors(const std::vector<Door_detector::Door> &doors)
+    std::vector<PreObject> PreObject::add_doors(const std::vector<DoorDetector::Door> &doors)
     {
         std::vector<PreObject> bdoors;
         for(const auto &d: doors)

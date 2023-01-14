@@ -23,6 +23,8 @@
 #include "preobject.h"
 
 class State_machine {
+private:
+    bool first_time;
 public:
     enum class State {IDLE, SEARCHING, APPROACHING, CROSSING};
     State state = State::SEARCHING;
