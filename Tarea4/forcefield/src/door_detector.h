@@ -1,7 +1,6 @@
 //
 // Created by alumno on 7/12/22.
 //
-
 #ifndef FORCEFIELD_DOOR_DETECTOR_H
 #define FORCEFIELD_DOOR_DETECTOR_H
 

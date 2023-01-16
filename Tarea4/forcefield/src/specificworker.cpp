@@ -192,6 +192,11 @@ void SpecificWorker::initialize(int period)
 
         Period = 50;
         timer.start(Period);
+
+        camera_timer = new QTimer(this);
+        connect(camera_timer, SIGNAL(timeout()), this, SLOT(centerCamera()));
+        camera_timer->start(100);
+
         std::cout << "Worker initialized OK" << std::endl;
 	}
 }
@@ -227,6 +232,7 @@ void SpecificWorker::compute()
 
     /// Door Detector
     auto doors = door_detector.detect(omni_lines, viewer);
+    //auto doors = door_detector.detector(current_line);
     //door_detector.draw_doors(doors, viewer);
 
     auto yoloObjs = rc::PreObject::add_yolo(yolo_Objects, robot.get_tf_cam_to_base());
@@ -429,6 +435,23 @@ std::vector<std::vector<Eigen::Vector2f>> SpecificWorker::get_multi_level_3d_poi
 void SpecificWorker::set_target_force(const Eigen::Vector3f &vec)
 {
     target_coordinates = vec * 1000;  //to mm/sg
+}
+
+void SpecificWorker::centerCamera(){
+    static RoboCompJointMotorSimple::MotorState servo_state;
+    try
+    {
+        servo_state = jointmotorsimple_proxy->getMotorState("camera_pan_joint");
+        if( fabs(servo_state.pos)  < 0.003) {
+            jointmotorsimple_proxy->setVelocity("camera_pan_joint", RoboCompJointMotorSimple::MotorGoalVelocity{0.00000001, 1.f});
+            return;
+        }
+        //jointmotorsimple_proxy->setPosition("camera_pan_joint", RoboCompJointMotorSimple::MotorGoalPosition{0.f, 1.f});
+        jointmotorsimple_proxy->setVelocity("camera_pan_joint", RoboCompJointMotorSimple::MotorGoalVelocity{-servo_state.pos, 2.f});
+        //usleep(100);
+
+    }
+    catch(const Ice::Exception &e){ std::cout << e.what() << std::endl; return;}
 }
 
 // action

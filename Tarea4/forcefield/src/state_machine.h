@@ -24,7 +24,7 @@
 
 class State_machine {
 private:
-    bool first_time;
+    bool first_time = true;
 public:
     enum class State {IDLE, SEARCHING, APPROACHING, CROSSING};
     State state = State::SEARCHING;

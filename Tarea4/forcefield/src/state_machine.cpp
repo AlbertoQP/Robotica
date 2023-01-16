@@ -5,7 +5,7 @@
 #include "state_machine.h"
 #include "specificworker.h"
 
-int UMBRAL_OBJETIVO = 100;
+int UMBRAL_OBJETIVO = 1000;
 
 void State_machine::statemachine(const std::vector<rc::PreObject> objects, rc::Robot &robot)
 {
@@ -41,7 +41,7 @@ void State_machine::search_state(const std::vector<rc::PreObject> objects, rc::R
         std::cout << "Nuevo target: " << robot.get_current_target().type;
     }
     else
-        robot.set_pure_rotation(0.7f);
+        robot.set_pure_rotation(0.6f);
 }
 
 void State_machine::approach_state(const std::vector<rc::PreObject> objects, rc::Robot &robot)
@@ -49,6 +49,7 @@ void State_machine::approach_state(const std::vector<rc::PreObject> objects, rc:
     // APPROACH STATE
     std::cout << "Approach State" << std::endl;
     robot.set_pure_rotation(0.0f);
+    std::cout << "Distancia al target: " << robot.get_distance_to_target() << std::endl;
 
     if (robot.get_distance_to_target() < UMBRAL_OBJETIVO)
     {
@@ -65,9 +66,10 @@ void State_machine::approach_state(const std::vector<rc::PreObject> objects, rc:
 void State_machine::cross_state(rc::Robot &robot)
 {
     std::cout << "Crossing" << std::endl;
+    //robot.advance(500);
+    //robot.set_has_target(false);
 
     static std::chrono::time_point<std::chrono::system_clock> start_chrono;
-    //static bool first_time = true;
 
     if (first_time)
     {
@@ -78,11 +80,12 @@ void State_machine::cross_state(rc::Robot &robot)
     auto end_chrono = std::chrono::system_clock::now();
     std::chrono::duration<float, std::milli> duration = end_chrono - start_chrono;
 
-    if (duration.count() > 1600)
+    if (duration.count() > 1400)
     {
         robot.set_has_target(false);
         state = State::SEARCHING;
         first_time = true;
+        //robot.advance(0);
     }
 }
 

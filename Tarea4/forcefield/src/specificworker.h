@@ -57,11 +57,13 @@ class SpecificWorker : public GenericWorker
         void compute();
         int startup_check();
         void initialize(int period);
+        void centerCamera();
 
     private:
 
     rc::Robot robot;
     rc::Camera top_camera;
+    QTimer *camera_timer;
 
     struct Constants
     {

@@ -12,20 +12,29 @@ namespace rc
     {
         this->omnirobot_proxy = omnirobot_proxy_;
     }
+
     Eigen::Vector3f Robot::get_robot_target_coordinates()
     {
         if(get_pure_rotation() != 0)
             return Eigen::Vector3f{0.f, 0.f, get_pure_rotation()};
 
-        //if(not has_target_flag)
-        //    return Eigen::Vector3f{0.f, 0.f, 0.f};
+        Eigen::Vector3f target;
 
-        Eigen::Transform<float, 3, Eigen::Affine> tf = get_tf_cam_to_base();
-        Eigen::Vector3f target = tf * get_camera_target_coordinates();
-        target[2] = 0.f;  // dismiss pure rotation here
-        target = target.normalized() * (target.norm() - min_distance_to_target);  // set target coordinates before the real target
+        if (get_current_target().type < 80)
+        {
+            Eigen::Transform<float, 3, Eigen::Affine> tf = get_tf_cam_to_base();
+            target = tf * get_camera_target_coordinates();
+            target[2] = 0.0f;  // dismiss pure rotation here
+            target = target.normalized() * (target.norm() - min_distance_to_target);  // set target coordinates before the real target
+        }
+        else
+        {
+            target = get_camera_target_coordinates();
+        }
+
         return target;
     }
+
     Eigen::Vector3f Robot::get_camera_target_coordinates() const
     {
         return Eigen::Vector3f{current_target.x, current_target.y, current_target.z};
@@ -33,16 +42,17 @@ namespace rc
     void Robot::set_current_speed(float adv, float rot)
     {
         current_adv_speed = std::clamp(adv, -max_advance_speed, max_advance_speed);
-        pure_rotation = std::clamp(rot, -max_rot_speed, max_rot_speed);
+        current_rot_speed = std::clamp(rot, -max_rot_speed, max_rot_speed);
     }
     void Robot::set_current_advance_speed(float adv)
     {
         current_adv_speed = std::clamp(adv, -max_advance_speed, max_advance_speed);
     }
-    /*void Robot::set_current_rot_speed(float rot)
+    void Robot::set_current_rot_speed(float rot)
     {
         current_rot_speed = std::clamp(rot, -max_rot_speed, max_rot_speed);
-    }*/
+    }
+
     void Robot::set_current_pan_angle(float pan)
     {
         camera_pan_angle = std::clamp(pan, min_pan_angle, max_pan_angle);
@@ -51,7 +61,8 @@ namespace rc
     {
         current_target = target;
         has_target_flag = true;
-        pure_rotation = 0;
+        pure_rotation = 0.0f;
+        pure_adv = 0.0f;
     }
 
     void Robot::set_has_target(bool val)
@@ -80,14 +91,16 @@ namespace rc
         return pure_rotation;
     }
 
+    float Robot::get_current_rot_speed() const
+    {
+        return current_rot_speed;
+    }
+
     float Robot::get_current_advance_speed() const
     {
         return current_adv_speed;
     }
-    /*float Robot::get_current_rot_speed() const
-    {
-        return current_rot_speed;
-    }*/
+
     float Robot::get_target_angle_in_frame() const
     {
         return atan2(current_target.x, current_target.y);
@@ -241,48 +254,40 @@ namespace rc
         { std::cout << e.what() << " Error reading omnirobot_proxy::getBaseSpeed" << std::endl; }
     }
 
+    void Robot::advance(float adv_vel) { pure_adv = adv_vel ;}
+
     void Robot::goto_target(const std::vector<Eigen::Vector2f> &current_line, AbstractGraphicViewer *viewer)
     {
         float adv, rot, side;
 
-        if (pure_rotation != 0.0f)
+        if (pure_rotation > 0.0f)
         {
             std::cout << "pure rotation!" << std::endl;
-            side = 0;
             rot = pure_rotation;
-            adv = 0;
         }
+
+        /*if (pure_adv > 0.0f)
+            adv = pure_adv;*/
+
         else if (has_target_flag)
         {
-            /*
-            if(forward)
-            {
                 // DWA algorithm
                 auto [adv1, rot1, side1] = dwa.update(get_robot_target_coordinates(), current_line,
                                                       get_current_advance_speed(), get_current_rot_speed(), viewer);
-                side = side1;
-                rot = 0;
-                adv = 600;
-            }
-            else
-            {*/
-                // DWA algorithm
-                auto [adv1, rot1, side1] = dwa.update(get_robot_target_coordinates(), current_line,
-                                                      get_current_advance_speed(), get_pure_rotation(), viewer);
 
 
                 std::cout << "DWA algorithm" << std::endl;
                 side = side1;
                 rot = rot1;
                 adv = adv1;
-           // }
         }
         else
         {
-            side=0;
-            rot=0;
-            adv=0;
+            side = 0;
+            rot = 0;
+            adv = 0;
         }
+
 
         std::cout << side << " " << rot << " " << adv << std::endl;
 

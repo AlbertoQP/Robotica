@@ -34,7 +34,7 @@ namespace rc
                 Eigen::Vector3f get_robot_target_coordinates();
                 Eigen::Vector3f get_camera_target_coordinates() const;
                 float get_current_advance_speed() const;
-                //float get_current_rot_speed() const;
+                float get_current_rot_speed() const;
                 float get_target_angle_in_frame() const;
                 float get_current_pan_angle() const;
                 rc::PreObject get_current_target() const;
@@ -44,9 +44,10 @@ namespace rc
                 void print();
                 void create_bumper(float offset =  150, AbstractGraphicViewer *viewer=nullptr);
 
+                void advance(float adv_vel);
                 void set_current_speed(float adv, float rot);
                 void set_current_advance_speed(float adv);
-                //void set_current_rot_speed(float rot);
+                void set_current_rot_speed(float rot);
                 void set_current_pan_angle(float pan);
                 void set_current_target(const rc::PreObject &target);
                 void set_has_target(bool val);
@@ -76,14 +77,15 @@ namespace rc
 
             private:
                 float current_adv_speed = 0;
-                //float current_rot_speed = 0;
+                float current_rot_speed = 0;
                 float camera_pan_angle = 0.f;
-                float min_distance_to_target = 800.f;
+                float min_distance_to_target = 200.f;
                 Eigen::Transform<float, 3, Eigen::Affine> tf;
                 std::vector<std::string> axes;
                 RoboCompJointMotorSimple::JointMotorSimplePrxPtr joint_motor_proxy;
                 RoboCompOmniRobot::OmniRobotPrxPtr omnirobot_proxy;
                 float pure_rotation = 0.f;
+                float pure_adv = 0.0f;
                 rc::PreObject current_target;
                 bool has_target_flag = false;
                 bool forward = false;
