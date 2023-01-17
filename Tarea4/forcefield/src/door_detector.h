@@ -28,11 +28,11 @@ public:
     std::vector<Eigen::Vector2f> filter_out_points_beyond_doors(const std::vector<Eigen::Vector2f> &floor_line_cart, const std::vector<DoorDetector::Door> &doors);
 
 private:
-    const float der_threshold = 800.f;
+    const float der_threshold = 500.f;//800
     const int n_lines = 4;
-    const float max_door_width = 1100;
+    const float max_door_width = 1100;//1100
     const float min_door_width = 700; // mm
-    const float max_door_separation = 100; //mm
+    const float max_door_separation = 100; //mm 100
     void draw_peaks(const std::vector<std::tuple<int, bool>> &peaks, const std::vector<Eigen::Vector2f> &line, AbstractGraphicViewer *viewer=nullptr);
     void draw_doors(const std::vector<Door> &doors, AbstractGraphicViewer *viewer=nullptr);
 };

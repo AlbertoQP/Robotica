@@ -5,7 +5,7 @@
 #include "state_machine.h"
 #include "specificworker.h"
 
-int UMBRAL_OBJETIVO = 550;
+int UMBRAL_OBJETIVO = 600; //550
 
 void State_machine::statemachine(const std::vector<rc::PreObject> objects, rc::Robot &robot, Graph &graph)
 {
@@ -86,7 +86,7 @@ void State_machine::cross_state(rc::Robot &robot, Graph &graph)
     auto end_chrono = std::chrono::system_clock::now();
     std::chrono::duration<float, std::milli> duration = end_chrono - start_chrono;
 
-    if (duration.count() > 1600)
+    if (duration.count() > 1650)//1600
     {
         actual_node = graph.add_node(actual_node + 1);
         graph.show();
