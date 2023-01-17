@@ -29,7 +29,10 @@ public:
     int add_node(int node_dest);
     void add_edge(int n1, int n2);
     void add_tags(int id, const std::vector<rc::PreObject> &objects);
+    bool isEmpty();
+    void remove_duplicate_node(int id);
     void show();
+
     //void draw(AbstractGraphicViewer *viewer);
 
 private:

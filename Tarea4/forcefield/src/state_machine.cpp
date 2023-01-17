@@ -37,9 +37,15 @@ void State_machine::search_state(const std::vector<rc::PreObject> objects, rc::R
 {
     // SEARCHING STATE
     std::cout << "Search State" << std::endl;
-    std::cout << objects.size() << std::endl;
 
     graph.add_tags(actual_node, objects);
+
+    /*
+    if(!graph.isEmpty())
+        graph.remove_duplicate_node(actual_node);
+    */
+
+    graph.show();
 
     if(auto it = std::ranges::find_if_not(objects.begin(), objects.end(),
                                   [r = robot](auto &a){return a.type == r.get_current_target().type;}); it != objects.end() && it->type == 80)
@@ -89,7 +95,6 @@ void State_machine::cross_state(rc::Robot &robot, Graph &graph)
     if (duration.count() > 1650)//1600
     {
         actual_node = graph.add_node(actual_node + 1);
-        graph.show();
 
         robot.set_has_target(false);
         state = State::SEARCHING;
