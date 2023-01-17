@@ -5,7 +5,7 @@
 #include "state_machine.h"
 #include "specificworker.h"
 
-int UMBRAL_OBJETIVO = 1000;
+int UMBRAL_OBJETIVO = 550;
 
 void State_machine::statemachine(const std::vector<rc::PreObject> objects, rc::Robot &robot)
 {
@@ -41,7 +41,7 @@ void State_machine::search_state(const std::vector<rc::PreObject> objects, rc::R
         std::cout << "Nuevo target: " << robot.get_current_target().type;
     }
     else
-        robot.set_pure_rotation(0.6f);
+        robot.set_pure_rotation(0.4f);
 }
 
 void State_machine::approach_state(const std::vector<rc::PreObject> objects, rc::Robot &robot)
@@ -80,7 +80,7 @@ void State_machine::cross_state(rc::Robot &robot)
     auto end_chrono = std::chrono::system_clock::now();
     std::chrono::duration<float, std::milli> duration = end_chrono - start_chrono;
 
-    if (duration.count() > 1400)
+    if (duration.count() > 1600)
     {
         robot.set_has_target(false);
         state = State::SEARCHING;
