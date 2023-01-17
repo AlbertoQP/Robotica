@@ -25,7 +25,6 @@
 #include <cppitertools/sliding_window.hpp>
 #include <cppitertools/combinations_with_replacement.hpp>
 
-
 /**
 * \brief Default constructor
 */
@@ -235,7 +234,7 @@ void SpecificWorker::compute()
     //auto doors = door_detector.detector(current_line);
     //door_detector.draw_doors(doors, viewer);
 
-    auto yoloObjs = rc::PreObject::add_yolo(yolo_Objects, robot.get_tf_cam_to_base());
+    auto yoloObjs = rc::PreObject::add_yolo(yolo_Objects, robot.get_tf_cam_to_base(), yolo_object_names);
     objectsVector.insert(objectsVector.end(), yoloObjs.begin(), yoloObjs.end());
 
     auto doorsObjs = rc::PreObject::add_doors(doors);
@@ -249,7 +248,7 @@ void SpecificWorker::compute()
 
     // TODO:: STATE MACHINE
     // state machine to activate basic behaviours. Returns a  target_coordinates vector
-    state_machine.statemachine(objectsVector, robot);
+    state_machine.statemachine(objectsVector, robot, graph);
     robot.goto_target(current_line, viewer);
 
     /// eye tracking: tracks  current selected object or  IOR if none
@@ -307,8 +306,8 @@ RoboCompYoloObjects::TObjects SpecificWorker::yolo_detect_objects(cv::Mat rgb)
     catch(const Ice::Exception &e){ std::cout << e.what() << std::endl; return objects;}
 
     // remove unwanted types
-    yolo_objects.objects.erase(std::remove_if(yolo_objects.objects.begin(), yolo_objects.objects.end(), [names = yolo_object_names](auto p)
-    { return names[p.type] != "person" and names[p.type] != "chair"; }), yolo_objects.objects.end());
+    //yolo_objects.objects.erase(std::remove_if(yolo_objects.objects.begin(), yolo_objects.objects.end(), [names = yolo_object_names](auto p)
+    //{ return names[p.type] != "person" and names[p.type] != "chair"; }), yolo_objects.objects.end());
 
     // draw boxes
     for(auto &&o: yolo_objects.objects | iter::filter([th = consts.yolo_threshold](auto &o){return o.score > th;}))

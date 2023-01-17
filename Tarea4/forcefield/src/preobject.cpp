@@ -2,7 +2,7 @@
 
 namespace rc
 {
-    PreObject::PreObject(const RoboCompYoloObjects::TBox &box, const  Eigen::Transform<float, 3, Eigen::Affine> &tf) :
+    PreObject::PreObject(const RoboCompYoloObjects::TBox &box, const  Eigen::Transform<float, 3, Eigen::Affine> &tf, RoboCompYoloObjects::TObjectNames t_objects) :
             id(box.id), type(box.type), left(box.left), top(box.top),
             right(box.right), bot(box.bot), score(box.score), depth(box.depth),
             x(box.x), y(box.y), z(box.z)
@@ -11,6 +11,8 @@ namespace rc
         rx = rc.x();
         ry = rc.y();
         rz = rc.z();
+
+        label=t_objects[type];
     }
     PreObject::PreObject(const DoorDetector::Door &d)
     {
@@ -22,11 +24,11 @@ namespace rc
         y = d.center_floor.y();
         z = 0.f;
     }
-    std::vector<PreObject> PreObject::add_yolo(const std::vector<RoboCompYoloObjects::TBox> &boxes, const  Eigen::Transform<float, 3, Eigen::Affine> &tf )
+    std::vector<PreObject> PreObject::add_yolo(const std::vector<RoboCompYoloObjects::TBox> &boxes, const  Eigen::Transform<float, 3, Eigen::Affine> &tf, RoboCompYoloObjects::TObjectNames t_objects)
     {
         std::vector<PreObject> bobjs;
         for(const auto &b: boxes)
-            bobjs.emplace_back(PreObject(b, tf));
+            bobjs.emplace_back(PreObject(b, tf, t_objects));
         return bobjs;
     }
     std::vector<PreObject> PreObject::add_doors(const std::vector<DoorDetector::Door> &doors)

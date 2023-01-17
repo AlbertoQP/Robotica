@@ -21,19 +21,21 @@
 #include "robot.h"
 #include "camera.h"
 #include "preobject.h"
+#include "graph.h"
 
 class State_machine {
 private:
     bool first_time = true;
+    int actual_node = 0;
 public:
     enum class State {IDLE, SEARCHING, APPROACHING, CROSSING};
     State state = State::SEARCHING;
-    void statemachine(const std::vector<rc::PreObject> objects, rc::Robot &robot); //ADD GRAPH
+    void statemachine(const std::vector<rc::PreObject> objects, rc::Robot &robot, Graph &graph);
 
-    void search_state(const std::vector<rc::PreObject> objects, rc::Robot &robot);
+    void search_state(const std::vector<rc::PreObject> objects, rc::Robot &robot, Graph &graph);
     void approach_state(const std::vector<rc::PreObject> objects, rc::Robot &robot);
-    void cross_state(rc::Robot &robot);
-    void idle_state(); //ADD GRAPH
+    void cross_state(rc::Robot &robot, Graph &graph);
+    void idle_state(Graph &graph);
 };
 
 

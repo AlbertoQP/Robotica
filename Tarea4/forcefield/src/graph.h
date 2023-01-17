@@ -6,40 +6,37 @@
 #define FORCEFIELD_GRAPH_H
 
 #include <Eigen/Dense>
-#include <QtGui>
-#include <QGraphicsItem>
 #include <abstract_graphic_viewer/abstract_graphic_viewer.h>
-#include <genericworker.h>
-#include <abstract_graphic_viewer/abstract_graphic_viewer.h>
-#include <timer/timer.h>
-#include <Eigen/Dense>
-#include <opencv2/core.hpp>
-#include <opencv2/imgproc.hpp>
-#include <opencv2/highgui.hpp>
-#include <dynamic_window.h>
-#include <timer/timer.h>
-#include "robot.h"
-#include "camera.h"
+#include <preobject.h>
 
-class Graph {
-private:
-    int graphSize;
-    std::vector<int> nodeArray;
-    std::vector<int> edge1Array;
-    std::vector<int> edge2Array;
-    void addEdge(int node1, int node2);
-    void deleteEdge(int node1, int node2);
+class Graph
+{
 public:
-    void addNode(int node);
-    void addUEdge(int node1, int node2);
-    int connectedComponents(void);
-    int checkNode(int node);
-    int checkEdge(int node1 , int node2);
-    void deleteNode(int node);
-    void deleteUEdge(int node1, int node2);
-    void printNodeList(void);
-    Graph(int size); //Constructor of the class
-};
+    Graph() = default;
+    struct Node
+    {
+        Node(int id_) : id(id_){};
+        int id;
+        std::set<std::string> objects;
+        QPointF draw_pos{0.f, 0.f};
+    };
+    struct Edge
+    {
+        Edge(int n1_, int n2_) : n1(n1_), n2(n2_){};
+        int n1, n2;
+    };
+    int add_node();
+    int add_node(int node_dest);
+    void add_edge(int n1, int n2);
+    void add_tags(int id, const std::vector<rc::PreObject> &objects);
+    void show();
+    //void draw(AbstractGraphicViewer *viewer);
 
+private:
+    int id_counter = 0;
+    std::map<int, Node> nodes;
+    std::map<std::pair<int, int>,  Edge> edges;
+
+};
 
 #endif //FORCEFIELD_GRAPH_H

@@ -41,6 +41,7 @@
 #include "door_detector.h"
 #include "state_machine.h"
 #include "preobject.h"
+#include <graph.h>
 
 class SpecificWorker : public GenericWorker
 {
@@ -150,7 +151,8 @@ class SpecificWorker : public GenericWorker
     // Clock
     rc::Timer<> clock;
 
-
+    // Graph
+    Graph graph;
 };
 
 #endif

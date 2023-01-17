@@ -262,7 +262,7 @@ namespace rc
 
         if (pure_rotation > 0.0f)
         {
-            std::cout << "pure rotation!" << std::endl;
+            std::cout << "Pure rotation!" << std::endl;
             rot = pure_rotation;
         }
 
